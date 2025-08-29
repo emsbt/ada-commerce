@@ -89,23 +89,39 @@ A camada `Repository` faz o gerenciamento das operações de CRUD usando JDBC ou
 3. Execute a aplicação JavaFX através da IDE ou pelo terminal:
    `java -jar ada-commerce.jar`
 
-## Dicas Importantes
-
-- Utilize boas práticas de orientação a objetos e SOLID.
-- Separe bem as camadas do sistema.
-- Documente o código e métodos principais.
-- Teste todas as funcionalidades antes de entregar.
-
-## Entrega
-
-Envie o link do repositório do projeto no GitHub conforme solicitado pela Ada Tech.
-
----
-
-**Bônus:** Caso deseje persistir os dados em arquivos locais, basta adaptar a camada de persistência para usar arquivos `.json`, `.xml` ou `.csv`.
-
----
-
-### Contato
-
-Dúvidas e sugestões, entre em contato com a equipe através do e-mail: suporte@adatech.com
+ada-commerce/
+├── pom.xml
+└── src/
+    ├── main/
+    │   ├── java/
+    │   │   └── br/
+    │   │       └── com/
+    │   │           └── adacommerce/
+    │   │               ├── application/
+    │   │               │   └── Main.java
+    │   │               ├── controller/
+    │   │               │   ├── ClientesController.java
+    │   │               │   ├── LoginController.java
+    │   │               │   └── PrincipalController.java
+    │   │               ├── database/
+    │   │               │   ├── ClienteDAO.java
+    │   │               │   ├── DatabaseConnection.java
+    │   │               │   ├── PedidoDAO.java
+    │   │               │   └── ProdutoDAO.java
+    │   │               ├── model/
+    │   │               │   ├── Cliente.java
+    │   │               │   ├── ItemPedido.java
+    │   │               │   ├── Pedido.java
+    │   │               │   ├── Produto.java
+    │   │               │   └── StatusPedido.java
+    │   │               └── service/
+    │   │                   └── EmailService.java
+    │   └── resources/
+    │       ├── css/
+    │       │   └── styles.css
+    │       └── view/
+    │           ├── Clientes.fxml
+    │           ├── Login.fxml
+    │           └── Principal.fxml
+    └── test/
+        └── java/
