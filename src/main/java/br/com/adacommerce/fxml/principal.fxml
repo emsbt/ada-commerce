@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.adacommerce.controller.PrincipalController">
+    <top>
+        <HBox styleClass="toolbar">
+            <children>
+                <Label text="Ada Commerce - Gerenciamento de Categorias" />
+            </children>
+        </HBox>
+    </top>
+    <left>
+        <VBox prefWidth="350.0" styleClass="form-container">
+            <children>
+                <Label text="Cadastro de Categoria" style="-fx-font-size: 16; -fx-font-weight: bold;" />
+                <TextField fx:id="txtNome" promptText="Nome da Categoria" />
+                <TextArea fx:id="txtDescricao" prefRowCount="3" promptText="Descrição" />
+                <ComboBox fx:id="cbCategoriaPai" promptText="Categoria Pai (opcional)" maxWidth="1.7976931348623157E308" />
+                <CheckBox fx:id="chkAtivo" text="Ativo" />
+                <HBox spacing="10">
+                    <children>
+                        <Button fx:id="btnSalvar" styleClass="btn-primary" text="Salvar" />
+                        <Button fx:id="btnLimpar" styleClass="btn-secondary" text="Limpar" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </left>
+    <center>
+        <VBox>
+            <children>
+                <Label text="Categorias Cadastradas" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-padding: 10;" />
+                <TableView fx:id="tblCategorias" prefHeight="400.0">
+                    <columns>
+                        <TableColumn fx:id="colNome" prefWidth="150.0" text="Nome" />
+                        <TableColumn fx:id="colDescricao" prefWidth="200.0" text="Descrição" />
+                        <TableColumn fx:id="colPai" prefWidth="150.0" text="Categoria Pai" />
+                        <TableColumn fx:id="colAtivo" prefWidth="80.0" text="Ativo" />
+                    </columns>
+                </TableView>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>

@@ -1,24 +1,118 @@
-# Compiled class file
+# Arquivos compilados do Java
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
-*.nar
 *.ear
 *.zip
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+# Pastas de build
+/target/
+/build/
+/out/
+/bin/
+/dist/
+
+# Logs
+*.log
+logs/
+
+# Arquivos do IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+*.ids
+*.orig
+
+# Diretório de módulos
+/.idea/modules.xml
+/.idea/modules.xml
+
+# Configurações específicas do workspace
+/.idea/workspace.xml
+/.idea/tasks.xml
+/.idea/dictionaries/
+/.idea/shelf/
+
+# Configurações de execução
+/.idea/runConfigurations/
+
+# Plugin do Gradle
+/.idea/gradle.xml
+
+# Plugin do Maven
+/.idea/compiler.xml
+/.idea/encodings.xml
+/.idea/jarRepositories.xml
+/.idea/libraries/
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Arquivos de configuração específicos
+*.properties
+*.cfg
+*.config
+
+# Arquivos do Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Arquivos do Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Cache do Gradle
+.cache/
+
+# Arquivos do Eclipse
+.settings/
+.project
+.classpath
+
+# Arquivos do NetBeans
+nbproject/
+nb-configuration.xml
+
+# Arquivos do VS Code
+.vscode/
+
+# Coverage reports
+/jacoco.exec
+/jacoco-it.exec
+/coverage/
+*.lcov
+
+# Arquivos de checkpoint
+*.ckp
+
+# Arquivos de backup
+*.bak
+*.backup
+
+# Arquivos de patch
+*.patch
+*.diff
