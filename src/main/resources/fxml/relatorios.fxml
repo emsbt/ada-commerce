@@ -2,24 +2,45 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
-
 <BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="br.com.adacommerce.controller.RelatoriosController">
 
     <center>
         <VBox spacing="10">
             <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+
             <Label text="Relatórios" style="-fx-font-weight:bold; -fx-font-size:16;"/>
+
             <HBox spacing="8">
                 <Label text="Tipo:"/>
                 <ComboBox fx:id="comboTipo" prefWidth="240"/>
-                <Label text="Período:"/>
+
+                <Label text="Início:"/>
                 <DatePicker fx:id="dtInicio"/>
+
+                <Label text="Fim:"/>
                 <DatePicker fx:id="dtFim"/>
+
+                <Label text="Valor:"/>
+                <TextField fx:id="txtParametro" promptText="Limite / valor opcional" prefWidth="100"/>
+
                 <Button text="Gerar" onAction="#onGerar"/>
+                <Button text="Exportar CSV" fx:id="btnExportar" disable="true" onAction="#onExportar"/>
             </HBox>
-            <TableView fx:id="tableResultados" prefHeight="360"/>
-            <Label fx:id="lblResumo" text=""/>
+
+            <TableView fx:id="tableResultados" prefHeight="420"/>
+
+            <HBox spacing="12">
+                <Label fx:id="lblResumo" text="" style="-fx-font-weight:bold;"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <ProgressIndicator fx:id="progress" visible="false" prefWidth="28" prefHeight="28"/>
+            </HBox>
+
+            <TitledPane text="Descrição do Relatório" expanded="false">
+                <content>
+                    <TextArea fx:id="txtDescricao" editable="false" wrapText="true" prefRowCount="3"/>
+                </content>
+            </TitledPane>
         </VBox>
     </center>
 </BorderPane>

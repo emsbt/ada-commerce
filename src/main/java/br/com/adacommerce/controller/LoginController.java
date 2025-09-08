@@ -14,18 +14,13 @@ public class LoginController {
 
     @FXML
     private void onEntrar() {
-        String usuario = txtUsuario.getText();
-        // (Validação simples)
-        if (usuario == null || usuario.isBlank()) {
-            // TODO: Mostrar alerta se quiser
-            return;
-        }
-
-        AuthSession.setUsuarioLogado(usuario);
-
+        // Validação simples
+        String user = txtUsuario.getText().trim();
+        if (user.isEmpty()) user = "desconhecido";
+        AuthSession.setUsuarioLogado(user);
         try {
-            Stage atual = (Stage) txtUsuario.getScene().getWindow();
-            atual.close();
+            Stage stage = (Stage) txtUsuario.getScene().getWindow();
+            stage.close();
             ViewLoader.openOnNewStage("/fxml/main.fxml", "Ada Commerce");
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      spacing="12">
+    <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+
+    <Label text="Dashboard" style="-fx-font-size:20; -fx-font-weight:bold;"/>
+    <Label text="Selecione um módulo no menu superior para começar." style="-fx-font-size:14;"/>
+    <Separator/>
+    <HBox spacing="20">
+        <VBox spacing="4">
+            <Label text="Resumo (exemplo)" style="-fx-font-weight:bold;"/>
+            <Label text="Pedidos hoje: 0"/>
+            <Label text="Vendas mês: 0,00"/>
+            <Label text="Clientes ativos: 0"/>
+        </VBox>
+    </HBox>
+</VBox>

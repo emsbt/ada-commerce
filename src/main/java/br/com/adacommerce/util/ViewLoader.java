@@ -6,32 +6,23 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-import java.net.URL;
-
 public class ViewLoader {
 
-    public static Node loadNode(String path) throws IOException {
-        URL url = ViewLoader.class.getResource(path);
-        if (url == null) {
-            throw new IllegalStateException("FXML não encontrado no classpath: " + path +
-                    ". Verifique se existe em src/main/resources" + path);
-        }
-        FXMLLoader loader = new FXMLLoader(url);
+    public static Node loadNode(String path) throws Exception {
+        System.out.println("[ViewLoader] loadNode: " + path);
+        FXMLLoader loader = new FXMLLoader(ViewLoader.class.getResource(path));
         return loader.load();
     }
 
-    public static void openOnNewStage(String path, String title) throws IOException {
-        URL url = ViewLoader.class.getResource(path);
-        if (url == null) {
-            throw new IllegalStateException("FXML não encontrado no classpath: " + path);
-        }
-        FXMLLoader loader = new FXMLLoader(url);
+    public static void openOnNewStage(String path, String titulo) throws Exception {
+        System.out.println("[ViewLoader] openOnNewStage: " + path + " title=" + titulo);
+        FXMLLoader loader = new FXMLLoader(ViewLoader.class.getResource(path));
         Parent root = loader.load();
         Stage stage = new Stage();
-        stage.setTitle(title);
+        stage.setTitle(titulo);
         stage.setScene(new Scene(root));
-        stage.setResizable(false);
+        stage.setMinWidth(1000);
+        stage.setMinHeight(640);
         stage.show();
     }
 }

@@ -1,71 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
 
-<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="br.com.adacommerce.controller.MainController">
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.adacommerce.controller.MainController"
+            fx:id="root"
+            prefWidth="1100" prefHeight="680">
 
     <top>
-        <VBox spacing="0">
-            <MenuBar>
-                <menus>
-                    <Menu text="Cadastros">
-                        <items>
-                            <MenuItem text="Categorias" onAction="#menuCategorias"/>
-                            <MenuItem text="Produtos" onAction="#menuProdutos"/>
-                            <MenuItem text="Clientes" onAction="#menuClientes"/>
-                            <MenuItem text="Usuários" onAction="#menuUsuarios"/>
-                        </items>
-                    </Menu>
-                    <Menu text="Operações">
-                        <items>
-                            <MenuItem text="Pedidos" onAction="#menuPedidos"/>
-                        </items>
-                    </Menu>
-                    <Menu text="Admin">
-                        <items>
-                            <MenuItem text="Gerenciar Usuários" onAction="#menuUsuarios"/>
-                        </items>
-                    </Menu>
-                    <Menu text="Sistema">
-                        <items>
-                            <MenuItem text="Logout" onAction="#menuLogout"/>
-                            <MenuItem text="Sair" onAction="#menuSair"/>
-                        </items>
-                    </Menu>
-                </menus>
+        <VBox spacing="4">
+            <MenuBar fx:id="menuBar">
+                <Menu text="Cadastro">
+                    <MenuItem text="Clientes"    onAction="#menuClientes"    accelerator="CTRL+C"/>
+                    <MenuItem text="Produtos"    onAction="#menuProdutos"    accelerator="CTRL+P"/>
+                    <MenuItem text="Categorias"  onAction="#menuCategorias"/>
+                    <MenuItem text="Usuários"    onAction="#menuUsuarios"/>
+                </Menu>
+                <Menu text="Operações">
+                    <MenuItem text="Pedidos"     onAction="#menuPedidos"     accelerator="CTRL+O"/>
+                </Menu>
+                <Menu text="Relatórios">
+                    <MenuItem text="Relatórios"  onAction="#menuRelatorios"  accelerator="CTRL+R"/>
+                </Menu>
+                <Menu text="Sessão">
+                    <MenuItem text="Logout"      onAction="#menuLogout"      accelerator="CTRL+L"/>
+                    <MenuItem text="Sair"        onAction="#menuSair"/>
+                </Menu>
             </MenuBar>
 
-            <HBox spacing="8">
-                <padding>
-                    <Insets top="8" right="8" bottom="8" left="8"/>
-                </padding>
-                <VBox spacing="6">
-                    <Label text="Módulos" style="-fx-font-weight: bold;"/>
-                    <Button text="Categorias" onAction="#menuCategorias"/>
-                    <Button text="Produtos" onAction="#menuProdutos"/>
-                    <Button text="Clientes" onAction="#menuClientes"/>
-                    <Button text="Pedidos" onAction="#menuPedidos"/>
-                    <Button text="Usuários" onAction="#menuUsuarios"/>
-                </VBox>
-                <Separator orientation="VERTICAL"/>
-                <StackPane fx:id="contentArea" prefWidth="900" prefHeight="560"
-                           style="-fx-background-color: #f8f9fa; -fx-border-color: #d0d7de; -fx-border-width:1;">
-                    <Label text="Selecione um módulo..." style="-fx-text-fill:#555;"/>
-                </StackPane>
+            <HBox spacing="10" style="-fx-background-color:#f3f3f3; -fx-padding:6;">
+                <Label fx:id="lblTitulo" text="Dashboard"
+                       style="-fx-font-size:18; -fx-font-weight:bold;"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <Label text="Bem-vindo:"/>
+                <Label fx:id="lblUsuarioLogado" text="(usuário)" style="-fx-font-weight:bold;"/>
             </HBox>
         </VBox>
     </top>
 
+    <center>
+        <StackPane fx:id="contentRoot" style="-fx-padding:12;">
+            <Label text="Selecione uma opção no menu." style="-fx-font-size:14;"/>
+        </StackPane>
+    </center>
+
     <bottom>
-        <HBox spacing="12" style="-fx-background-color:#f1f5f9; -fx-border-color:#d0d7de; -fx-border-width:1 0 0 0;">
-            <padding>
-                <Insets top="6" right="6" bottom="6" left="6"/>
-            </padding>
-            <Label fx:id="lblStatus" text="Pronto"/>
+        <HBox spacing="10" style="-fx-background-color:#f0f0f0; -fx-padding:4;">
+            <Label text="Ada Commerce"/>
             <Pane HBox.hgrow="ALWAYS"/>
-            <Label fx:id="lblUsuario" text="Usuário: -"/>
+            <Label fx:id="lblStatus" text="Pronto"/>
+            <Label text="© 2025"/>
         </HBox>
     </bottom>
+
 </BorderPane>
