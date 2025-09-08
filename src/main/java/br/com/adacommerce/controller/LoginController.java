@@ -11,14 +11,9 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 public class LoginController {
-    @FXML
-    private TextField txtUsuario;
-
-    @FXML
-    private PasswordField txtSenha;
-
-    @FXML
-    private Label lblErro;
+    @FXML private TextField txtUsuario;
+    @FXML private PasswordField txtSenha;
+    @FXML private Label lblErro;
 
     @FXML
     private void fazerLogin() {
@@ -37,7 +32,7 @@ public class LoginController {
             UsuarioService usuarioService = new UsuarioService();
             boolean resultado = usuarioService.autenticar(usuario, senha);
             if (resultado) {
-                abrirTelaPrincipal();
+                abrirShellPrincipal();
             } else {
                 lblErro.setText("Usuário ou senha inválidos!");
                 lblErro.setVisible(true);
@@ -50,19 +45,19 @@ public class LoginController {
         }
     }
 
-    private void abrirTelaPrincipal() {
+    private void abrirShellPrincipal() {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/principal.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/main.fxml"));
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
-            stage.setTitle("Ada Commerce - Sistema Principal");
+            stage.setTitle("Ada Commerce");
+            stage.setMaximized(true);
             stage.show();
 
-            // Fechar a tela de login
             Stage loginStage = (Stage) txtUsuario.getScene().getWindow();
             loginStage.close();
         } catch (Exception e) {
-            System.err.println("Erro ao abrir tela principal: " + e.getMessage());
+            System.err.println("Erro ao abrir shell principal: " + e.getMessage());
         }
     }
 }

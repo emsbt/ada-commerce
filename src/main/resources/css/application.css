@@ -1,0 +1,84 @@
+/* CSS application styles */
+
+.root {
+    -fx-font-family: "Segoe UI", "Arial";
+    -fx-base: #f5f6f8;
+}
+
+.menu-bar {
+    -fx-background-color: linear-gradient(to bottom, #2f3e52, #233040);
+}
+.menu-bar .label {
+    -fx-text-fill: #ffffff;
+}
+
+.side-nav {
+    -fx-background-color: #2f3e52;
+    -fx-padding: 12;
+}
+.side-nav .label.side-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 8 0;
+}
+.side-nav .button {
+    -fx-background-color: #45566e;
+    -fx-text-fill: #fff;
+}
+.side-nav .button:hover {
+    -fx-background-color: #5b6d87;
+}
+
+.status-bar {
+    -fx-background-color: #ececec;
+    -fx-padding: 4 10;
+}
+
+.view-title {
+    -fx-font-size: 20;
+    -fx-font-weight: bold;
+}
+
+.form-panel {
+    -fx-padding: 12;
+    -fx-background-color: #fafafa;
+    -fx-border-color: #d7d7d7;
+    -fx-border-width: 0 0 0 1;
+}
+
+.table-row-cell:odd { -fx-background-color: #ffffff; }
+.table-row-cell:even { -fx-background-color: #f9fbfd; }
+.table-row-cell:selected {
+    -fx-background-color: #3c7fb1;
+    -fx-text-fill: white;
+}
+
+.btn-mini {
+    -fx-font-size: 11;
+    -fx-padding: 2 6;
+}
+
+.btn-danger {
+    -fx-background-color: #c0392b;
+    -fx-text-fill: #fff;
+}
+.btn-danger:hover {
+    -fx-background-color: #e74c3c;
+}
+
+.info-label {
+    -fx-text-fill: #555;
+    -fx-font-size: 12;
+}
+
+.toolbar {
+    -fx-padding: 8;
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d7d7d7;
+    -fx-border-width: 0 0 1 0;
+}
+
+.form-title {
+    -fx-font-size: 16;
+    -fx-font-weight: bold;
+}
