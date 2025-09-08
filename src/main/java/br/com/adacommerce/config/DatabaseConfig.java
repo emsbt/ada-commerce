@@ -150,7 +150,8 @@ public class DatabaseConfig {
         }
     }
 
-    private static Connection getConnection() throws SQLException {
+    // Tornado público para uso pelos repositories / services
+    public static synchronized Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
             connection = DriverManager.getConnection(URL);
         }
