@@ -1,7 +1,5 @@
 package br.com.adacommerce.config;
 
-import org.mindrot.jbcrypt.BCrypt;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.*;
@@ -23,12 +21,10 @@ public final class DatabaseConfig {
             if (initialized) return;
             try {
                 Path dir = Path.of(DB_DIR);
-                if (!Files.exists(dir)) {
-                    Files.createDirectories(dir);
-                }
-                // Cria tabelas e seed usando uma conexão temporária
+                if (!Files.exists(dir)) Files.createDirectories(dir);
                 try (Connection c = DriverManager.getConnection(URL)) {
                     c.createStatement().execute("PRAGMA foreign_keys = ON");
+                    migrarTabelaItensSeNecessario(c);  // antes de criar para evitar conflito
                     criarTabelas(c);
                     seedOuMigrarAdmin(c);
                 }
@@ -36,6 +32,27 @@ public final class DatabaseConfig {
                 System.out.println("[DB] Inicializado em: " + DB_DIR + "/" + DB_FILE);
             } catch (Exception e) {
                 throw new RuntimeException("Falha ao inicializar banco: " + e.getMessage(), e);
+            }
+        }
+    }
+
+    private static boolean existeTabela(Connection c, String nome) throws SQLException {
+        try (PreparedStatement ps = c.prepareStatement(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name=?")) {
+            ps.setString(1, nome);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    private static void migrarTabelaItensSeNecessario(Connection c) throws SQLException {
+        boolean hasItemSingular = existeTabela(c, "item_pedido");
+        boolean hasItensPlural  = existeTabela(c, "itens_pedido");
+        if (hasItemSingular && !hasItensPlural) {
+            System.out.println("[DB] Migrando tabela item_pedido -> itens_pedido");
+            try (Statement st = c.createStatement()) {
+                st.execute("ALTER TABLE item_pedido RENAME TO itens_pedido");
             }
         }
     }
@@ -71,21 +88,27 @@ public final class DatabaseConfig {
                   email TEXT,
                   telefone TEXT,
                   endereco TEXT,
-                  data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
-                  ativo INTEGER DEFAULT 1
+                  ativo INTEGER DEFAULT 1,
+                  data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+                  data_atualizacao DATETIME DEFAULT CURRENT_TIMESTAMP
                 )""");
             st.execute("""
                 CREATE TABLE IF NOT EXISTS produto(
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
                   nome TEXT NOT NULL,
-                  preco_base REAL NOT NULL,
+                  descricao TEXT,
+                  categoria_id INTEGER,
+                  preco REAL NOT NULL,
+                  estoque_atual INTEGER DEFAULT 0,
                   ativo INTEGER DEFAULT 1,
-                  data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP
+                  data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+                  data_atualizacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+                  FOREIGN KEY(categoria_id) REFERENCES categoria(id)
                 )""");
             st.execute("""
                 CREATE TABLE IF NOT EXISTS pedido(
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  cliente_id INTEGER NOT NULL,
+                  cliente_id INTEGER,
                   status_pedido TEXT NOT NULL,
                   status_pagamento TEXT NOT NULL,
                   data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -93,13 +116,13 @@ public final class DatabaseConfig {
                   FOREIGN KEY(cliente_id) REFERENCES cliente(id)
                 )""");
             st.execute("""
-                CREATE TABLE IF NOT EXISTS item_pedido(
+                CREATE TABLE IF NOT EXISTS itens_pedido(
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
                   pedido_id INTEGER NOT NULL,
                   produto_id INTEGER NOT NULL,
+                  produto_nome_snapshot TEXT,
                   quantidade INTEGER NOT NULL,
-                  preco_venda REAL NOT NULL,
-                  subtotal REAL NOT NULL,
+                  preco_unitario REAL NOT NULL,
                   FOREIGN KEY(pedido_id) REFERENCES pedido(id),
                   FOREIGN KEY(produto_id) REFERENCES produto(id)
                 )""");
@@ -107,42 +130,23 @@ public final class DatabaseConfig {
     }
 
     private static void seedOuMigrarAdmin(Connection c) throws SQLException {
-        try (PreparedStatement ps = c.prepareStatement("SELECT id, senha FROM usuario WHERE usuario='admin'")) {
+        try (PreparedStatement ps = c.prepareStatement("SELECT id FROM usuario WHERE usuario='admin'")) {
             ResultSet rs = ps.executeQuery();
             if (!rs.next()) {
-                String hash = BCrypt.hashpw("admin123", BCrypt.gensalt());
                 try (PreparedStatement ins = c.prepareStatement(
                         "INSERT INTO usuario (nome,email,senha,usuario,ativo) VALUES (?,?,?,?,1)")) {
-                    ins.setString(1, "Admin");
-                    ins.setString(2, "admin@adacommerce.com");
-                    ins.setString(3, hash);
+                    ins.setString(1, "Administrador");
+                    ins.setString(2, "admin@local");
+                    ins.setString(3, "admin123");
                     ins.setString(4, "admin");
                     ins.executeUpdate();
-                    System.out.println("[DB] Usuário admin criado (admin / admin123).");
-                }
-            } else {
-                String senha = rs.getString("senha");
-                if (!(senha.startsWith("$2a$") || senha.startsWith("$2b$") || senha.startsWith("$2y$"))) {
-                    try (PreparedStatement up = c.prepareStatement(
-                            "UPDATE usuario SET senha=? WHERE usuario='admin'")) {
-                        up.setString(1, BCrypt.hashpw(senha, BCrypt.gensalt()));
-                        up.executeUpdate();
-                        System.out.println("[DB] Senha admin migrada para hash BCrypt.");
-                    }
                 }
             }
         }
     }
 
-    // Retorna SEMPRE nova conexão (cada try-with-resources fecha apenas a sua)
-    public static Connection getConnection() {
-        if (!initialized) initialize();
-        try {
-            Connection c = DriverManager.getConnection(URL);
-            c.createStatement().execute("PRAGMA foreign_keys = ON");
-            return c;
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro obtendo conexão: " + e.getMessage(), e);
-        }
+    public static Connection getConnection() throws SQLException {
+        initialize();
+        return DriverManager.getConnection(URL);
     }
 }
