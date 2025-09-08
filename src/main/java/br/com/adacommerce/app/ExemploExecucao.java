@@ -1,45 +1,69 @@
 package br.com.adacommerce.app;
 
-import br.com.adacommerce.domain.cliente.Cliente;
-import br.com.adacommerce.domain.pedido.ItemPedido;
-import br.com.adacommerce.domain.produto.Produto;
-import br.com.adacommerce.notification.ConsoleNotificador;
-import br.com.adacommerce.notification.Notificador;
-import br.com.adacommerce.repository.PedidoRepository;
-import br.com.adacommerce.repository.ProdutoRepository;
-import br.com.adacommerce.repository.ClienteRepository;
-import br.com.adacommerce.repository.sqlite.ClienteRepositorySqlite;
-import br.com.adacommerce.repository.sqlite.PedidoRepositorySqlite;
-import br.com.adacommerce.repository.sqlite.ProdutoRepositorySqlite;
+import br.com.adacommerce.config.DatabaseConfig;
+import br.com.adacommerce.model.*;
 import br.com.adacommerce.service.ClienteService;
 import br.com.adacommerce.service.PedidoService;
 import br.com.adacommerce.service.ProdutoService;
 
-import java.util.List;
+import java.util.Date;
 
 public class ExemploExecucao {
+    public static void main(String[] args) throws Exception {
+        DatabaseConfig.initialize();
 
-    public static void main(String[] args) {
-        Notificador notificador = new ConsoleNotificador();
+        ClienteService clienteService = new ClienteService();
+        ProdutoService produtoService = new ProdutoService();
+        PedidoService pedidoService = new PedidoService();
 
-        ClienteRepository clienteRepo = new ClienteRepositorySqlite();
-        ProdutoRepository produtoRepo = new ProdutoRepositorySqlite();
-        PedidoRepository pedidoRepo = new PedidoRepositorySqlite();
+        Cliente c = new Cliente();
+        c.setNome("Cliente Console");
+        c.setEmail("console@teste.com");
+        c.setDocumento("00000000000");
+        c.setTelefone("11999998888");
+        c.setAtivo(true);
+        clienteService.salvar(c);
 
-        ClienteService clienteService = new ClienteService(clienteRepo, notificador);
-        ProdutoService produtoService = new ProdutoService(produtoRepo, notificador);
-        PedidoService pedidoService = new PedidoService(pedidoRepo, notificador);
+        Produto p1 = new Produto();
+        p1.setNome("Produto A");
+        p1.setPreco(10.0);
+        p1.setEstoqueAtual(50);
+        p1.setAtivo(true);
+        produtoService.salvar(p1);
 
-        Cliente cli = clienteService.criar("João Silva", "12345678900", "joao@mail");
-        Produto prodA = produtoService.criar("Teclado", 150.00);
-        Produto prodB = produtoService.criar("Mouse", 70.00);
+        Produto p2 = new Produto();
+        p2.setNome("Produto B");
+        p2.setPreco(25.0);
+        p2.setEstoqueAtual(30);
+        p2.setAtivo(true);
+        produtoService.salvar(p2);
 
-        ItemPedido item1 = new ItemPedido(prodA, 1, prodA.getPrecoBase());
-        ItemPedido item2 = new ItemPedido(prodB, 2, prodB.getPrecoBase());
+        Pedido pedido = new Pedido();
+        pedido.setNumero("P" + System.currentTimeMillis());
+        pedido.setCliente(c);
+        pedido.setDataPedido(new Date());
+        pedido.setStatus(PedidoStatus.RASCUNHO);
 
-        var pedido = pedidoService.novo(cli, List.of(item1, item2));
-        System.out.println("Total do pedido: " + pedido.getTotal());
+        PedidoItem i1 = new PedidoItem();
+        i1.setProduto(p1);
+        i1.setQuantidade(2);
+        i1.setPrecoUnitario(p1.getPreco());
+        pedido.adicionarItem(i1);
 
-        pedidoService.aprovarPagamento(pedido.getId());
+        PedidoItem i2 = new PedidoItem();
+        i2.setProduto(p2);
+        i2.setQuantidade(1);
+        i2.setPrecoUnitario(p2.getPreco());
+        pedido.adicionarItem(i2);
+
+        pedido.recalcularTotais();
+        pedidoService.salvarRascunho(pedido);
+        System.out.println("Rascunho salvo ID=" + pedido.getId() + " Total=" + pedido.getTotalLiquido());
+
+        pedidoService.confirmarPedido(pedido);
+        System.out.println("Confirmado. Status=" + pedido.getStatus());
+
+        pedidoService.cancelarPedido(pedido);
+        System.out.println("Cancelado. Status=" + pedido.getStatus());
     }
 }

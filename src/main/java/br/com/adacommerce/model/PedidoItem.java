@@ -1,6 +1,6 @@
 package br.com.adacommerce.model;
 
-public class ItemPedido {
+public class PedidoItem {
     private Integer id;
     private Produto produto;
     private int quantidade;
@@ -9,31 +9,18 @@ public class ItemPedido {
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
-
     public Produto getProduto() { return produto; }
     public void setProduto(Produto produto) {
         this.produto = produto;
         if (produto != null && precoUnitario == 0) {
             this.precoUnitario = produto.getPreco();
         }
-        recalcular();
+        recalcularSubtotal();
     }
-
     public int getQuantidade() { return quantidade; }
-    public void setQuantidade(int quantidade) {
-        this.quantidade = quantidade;
-        recalcular();
-    }
-
+    public void setQuantidade(int quantidade) { this.quantidade = quantidade; recalcularSubtotal(); }
     public double getPrecoUnitario() { return precoUnitario; }
-    public void setPrecoUnitario(double precoUnitario) {
-        this.precoUnitario = precoUnitario;
-        recalcular();
-    }
-
+    public void setPrecoUnitario(double precoUnitario) { this.precoUnitario = precoUnitario; recalcularSubtotal(); }
     public double getSubtotal() { return subtotal; }
-
-    private void recalcular() {
-        subtotal = precoUnitario * quantidade;
-    }
+    private void recalcularSubtotal() { this.subtotal = precoUnitario * quantidade; }
 }

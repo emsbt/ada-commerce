@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.adacommerce.controller.ProdutosController">
+
+    <center>
+        <VBox spacing="8">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <HBox spacing="6">
+                <Label text="Produtos" style="-fx-font-weight:bold; -fx-font-size:14;"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="txtFiltro" promptText="Filtro..."/>
+                <Button text="Novo" onAction="#onNovo"/>
+                <Button text="Salvar" fx:id="btnSalvar" onAction="#onSalvar" disable="true"/>
+                <Button text="Cancelar" fx:id="btnCancelar" onAction="#onCancelar" disable="true"/>
+            </HBox>
+            <SplitPane dividerPositions="0.60">
+                <items>
+                    <VBox spacing="4">
+                        <TableView fx:id="tableProdutos" prefHeight="380">
+                            <columns>
+                                <TableColumn fx:id="colNome" text="Nome" prefWidth="160"/>
+                                <TableColumn fx:id="colCategoria" text="Categoria" prefWidth="120"/>
+                                <TableColumn fx:id="colPreco" text="Preço" prefWidth="80"/>
+                                <TableColumn fx:id="colEstoque" text="Estoque" prefWidth="80"/>
+                                <TableColumn fx:id="colAtivo" text="Ativo" prefWidth="60"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                    <VBox spacing="6">
+                        <padding><Insets top="6" right="6" bottom="6" left="6"/></padding>
+                        <Label fx:id="lblModo" text="Modo: visualização" style="-fx-font-weight:bold;"/>
+                        <Label text="Nome:"/>
+                        <TextField fx:id="txtNome" disable="true"/>
+                        <Label text="Descrição:"/>
+                        <TextArea fx:id="txtDescricao" disable="true" prefRowCount="3"/>
+                        <Label text="Categoria:"/>
+                        <ComboBox fx:id="comboCategoria" disable="true"/>
+                        <Label text="Preço:"/>
+                        <TextField fx:id="txtPreco" disable="true"/>
+                        <Label text="Estoque:"/>
+                        <TextField fx:id="txtEstoque" disable="true"/>
+                        <CheckBox fx:id="chkAtivo" text="Ativo" selected="true" disable="true"/>
+                        <Pane VBox.vgrow="ALWAYS"/>
+                        <HBox spacing="6">
+                            <Button text="Editar" onAction="#onEditar"/>
+                            <Button text="Remover" onAction="#onRemover"/>
+                        </HBox>
+                    </VBox>
+                </items>
+            </SplitPane>
+        </VBox>
+    </center>
+</BorderPane>

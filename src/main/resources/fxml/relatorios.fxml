@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="$CONTROLLER_NAME$"
-            prefHeight="400.0" prefWidth="600.0" >
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.adacommerce.controller.RelatoriosController">
 
-</AnchorPane>
+    <center>
+        <VBox spacing="10">
+            <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+            <Label text="Relatórios" style="-fx-font-weight:bold; -fx-font-size:16;"/>
+            <HBox spacing="8">
+                <Label text="Tipo:"/>
+                <ComboBox fx:id="comboTipo" prefWidth="240"/>
+                <Label text="Período:"/>
+                <DatePicker fx:id="dtInicio"/>
+                <DatePicker fx:id="dtFim"/>
+                <Button text="Gerar" onAction="#onGerar"/>
+            </HBox>
+            <TableView fx:id="tableResultados" prefHeight="360"/>
+            <Label fx:id="lblResumo" text=""/>
+        </VBox>
+    </center>
+</BorderPane>

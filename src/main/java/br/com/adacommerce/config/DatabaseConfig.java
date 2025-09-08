@@ -10,7 +10,7 @@ public class DatabaseConfig {
     private static final String DB_FILE = "ada-commerce.db";
     private static final String URL = "jdbc:sqlite:" + DB_DIR + "/" + DB_FILE;
     private static Connection connection;
-
+    private static volatile boolean initialized = false;
     // DDLs (compatível com Java 11)
     private static final String DDL_USUARIO =
             "CREATE TABLE IF NOT EXISTS usuario (" +
@@ -105,24 +105,23 @@ public class DatabaseConfig {
     }
 
     public static synchronized void initialize() {
-        try (Connection conn = getConnection()) {
-            conn.setAutoCommit(false);
-
-            executarDDL(conn, DDL_USUARIO);
-            garantirColunaUsuario(conn);
-            executarDDL(conn, DDL_CATEGORIA);
-            executarDDL(conn, DDL_CLIENTE);
-            executarDDL(conn, DDL_PRODUTO);
-            executarDDL(conn, DDL_PEDIDO);
-            executarDDL(conn, DDL_ITEM_PEDIDO);
-            executarDDL(conn, TRIGGER_PEDIDO_UPDATE);
-            executarDDL(conn, INSERT_ADMIN);
-
-            conn.commit();
+        if (initialized) return;
+        try {
+            connection = DriverManager.getConnection(URL);
+            // suas tabelas antigas...
+            // novas:
+            try {
+                new br.com.adacommerce.service.ClienteService().criarTabelasSeNaoExistir();
+                new br.com.adacommerce.service.ProdutoService().criarTabelasSeNaoExistir();
+                new br.com.adacommerce.service.PedidoService().criarTabelasSeNaoExistir();
+            } catch (Exception e) {
+                System.err.println("Falha criando tabelas novas: " + e.getMessage());
+                e.printStackTrace();
+            }
+            initialized = true;
             System.out.println("Estrutura de banco atualizada com sucesso.");
-        } catch (SQLException e) {
-            System.err.println("Erro na inicialização do banco: " + e.getMessage());
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException("Erro inicializando banco: " + e.getMessage(), e);
         }
     }
 

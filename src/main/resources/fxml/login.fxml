@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
 
-<VBox alignment="CENTER" prefHeight="600.0" prefWidth="800.0" styleClass="login-container"
-      xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="br.com.adacommerce.controller.LoginController">
-    <VBox alignment="CENTER" maxWidth="400.0" styleClass="login-box" spacing="15">
-        <Label styleClass="login-title" text="Ada Commerce"/>
-        <Label styleClass="login-subtitle" text="Sistema de E-Commerce"/>
-        <TextField fx:id="txtUsuario" promptText="Usu&#225;rio" styleClass="input-field"/>
-        <PasswordField fx:id="txtSenha" promptText="Senha" styleClass="input-field"/>
-        <Label fx:id="lblErro" styleClass="error-label" visible="false" text=" "/>
-        <Button fx:id="btnLogin" maxWidth="1.7976931348623157E308" styleClass="btn-primary" text="Entrar"
-                onAction="#fazerLogin"/>
-    </VBox>
-</VBox>
+<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.adacommerce.controller.LoginController">
+    <children>
+        <VBox spacing="10" layoutX="40" layoutY="40" prefWidth="300" prefHeight="240">
+            <children>
+                <Label text="Ada Commerce" style="-fx-font-size:18; -fx-font-weight:bold;"/>
+                <Label text="Usuário:"/>
+                <TextField fx:id="txtUsuario" promptText="Informe o usuário"/>
+                <Label text="Senha:"/>
+                <PasswordField fx:id="txtSenha" promptText="Informe a senha"/>
+                <Button text="Entrar" defaultButton="true" onAction="#onEntrar" prefWidth="120"/>
+            </children>
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+        </VBox>
+    </children>
+</AnchorPane>

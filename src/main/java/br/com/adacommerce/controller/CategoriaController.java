@@ -2,212 +2,243 @@ package br.com.adacommerce.controller;
 
 import br.com.adacommerce.model.Categoria;
 import br.com.adacommerce.service.CategoriaService;
-import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.util.Callback;
 
-public class CategoriaController extends BaseController {
+import java.sql.SQLException;
+import java.util.Date;
+
+public class CategoriaController {
+
+    @FXML private TableView<Categoria> tableCategorias;
+    @FXML private TableColumn<Categoria, String> colNome;
+    @FXML private TableColumn<Categoria, String> colDescricao;
+    @FXML private TableColumn<Categoria, String> colCategoriaPai;
+    @FXML private TableColumn<Categoria, Boolean> colAtivo;
+    // (Coluna Ações se existir: @FXML private TableColumn<Categoria, Void> colAcoes;)
 
     @FXML private TextField txtFiltro;
     @FXML private TextField txtNome;
     @FXML private TextArea txtDescricao;
-    @FXML private ComboBox<Categoria> cbCategoriaPai;
+    @FXML private ComboBox<Categoria> comboCategoriaPai;
     @FXML private CheckBox chkAtivo;
+    @FXML private Label lblModo;
     @FXML private Button btnNova;
     @FXML private Button btnSalvar;
     @FXML private Button btnCancelar;
-    @FXML private Label  lblInfo;
-    @FXML private TableView<Categoria> tblCategorias;
-    @FXML private TableColumn<Categoria, String> colNome;
-    @FXML private TableColumn<Categoria, String> colDescricao;
-    @FXML private TableColumn<Categoria, String> colPai;
-    @FXML private TableColumn<Categoria, Boolean> colAtivo;
-    @FXML private TableColumn<Categoria, Void> colAcoes;
 
-    private final CategoriaService service = new CategoriaService();
-    private final ObservableList<Categoria> masterData = FXCollections.observableArrayList();
-    private FilteredList<Categoria> filtered;
-    private Categoria editando;
+    private final CategoriaService categoriaService = new CategoriaService();
+    private final ObservableList<Categoria> categorias = FXCollections.observableArrayList();
 
-    @Override
-    public void onShow() {
-        if (masterData.isEmpty()) {
-            carregar();
-        }
-    }
+    private Categoria categoriaEmEdicao = null;
+    private enum Modo { VISUALIZACAO, NOVO, EDICAO }
+    private Modo modoAtual = Modo.VISUALIZACAO;
 
     @FXML
-    private void initialize() {
-        configurarTabela();
-        configurarEventos();
-        modoVisualizacao();
+    public void initialize() {
+        configurarColunas();
+        tableCategorias.setItems(categorias);
+        carregarCategorias();
+        configurarSelecaoTabela();
+        aplicarModo(Modo.VISUALIZACAO);
+
+        txtFiltro.textProperty().addListener((obs, o, n) -> aplicarFiltro(n));
     }
 
-    private void configurarTabela() {
-        colNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
-        colDescricao.setCellValueFactory(new PropertyValueFactory<>("descricao"));
-        colPai.setCellValueFactory(cd ->
-            Bindings.createStringBinding(() -> {
-                Categoria pai = cd.getValue().getCategoriaPai();
-                return pai != null ? pai.getNome() : "";
-            })
-        );
-        colAtivo.setCellValueFactory(new PropertyValueFactory<>("ativo"));
-        adicionarColunaAcoes();
-
-        filtered = new FilteredList<>(masterData, c -> true);
-        txtFiltro.textProperty().addListener((obs, o, n) -> {
-            String termo = n == null ? "" : n.toLowerCase();
-            filtered.setPredicate(cat ->
-                termo.isBlank()
-                    || cat.getNome().toLowerCase().contains(termo)
-                    || (cat.getDescricao() != null && cat.getDescricao().toLowerCase().contains(termo))
-            );
-        });
-
-        tblCategorias.setItems(filtered);
-
-        tblCategorias.setRowFactory(tv -> {
-            TableRow<Categoria> row = new TableRow<>();
-            row.setOnMouseClicked(e -> {
-                if (e.getClickCount() == 2 && !row.isEmpty()) {
-                    iniciarEdicao(row.getItem());
-                }
-            });
-            return row;
-        });
-    }
-
-    private void adicionarColunaAcoes() {
-        Callback<TableColumn<Categoria, Void>, TableCell<Categoria, Void>> factory = col -> new TableCell<>() {
-            private final Button btnEditar = new Button("Editar");
-            private final Button btnExcluir = new Button("X");
-
-            {
-                btnEditar.getStyleClass().add("btn-mini");
-                btnExcluir.getStyleClass().addAll("btn-mini", "btn-danger");
-                btnEditar.setOnAction(e -> iniciarEdicao(getTableView().getItems().get(getIndex())));
-                btnExcluir.setOnAction(e -> excluir(getTableView().getItems().get(getIndex())));
-            }
-
+    private void configurarColunas() {
+        colNome.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getNome()));
+        colDescricao.setCellValueFactory(c -> new SimpleStringProperty(
+                c.getValue().getDescricao() == null ? "" : c.getValue().getDescricao()
+        ));
+        colCategoriaPai.setCellValueFactory(c -> new SimpleStringProperty(
+                c.getValue().getCategoriaPai() != null ? c.getValue().getCategoriaPai().getNome() : ""
+        ));
+        colAtivo.setCellValueFactory(c -> new SimpleBooleanProperty(c.getValue().isAtivo()));
+        colAtivo.setCellFactory(col -> new TableCell<>() {
             @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
+            protected void updateItem(Boolean ativo, boolean empty) {
+                super.updateItem(ativo, empty);
+                if (empty || ativo == null) {
+                    setText(null);
                 } else {
-                    ToolBar bar = new ToolBar(btnEditar, btnExcluir);
-                    bar.setStyle("-fx-padding:0; -fx-background-color:transparent;");
-                    setGraphic(bar);
+                    setText(ativo ? "Sim" : "Não");
                 }
             }
-        };
-        colAcoes.setCellFactory(factory);
+        });
     }
 
-    private void configurarEventos() {
-        btnNova.setOnAction(e -> novo());
-        btnSalvar.setOnAction(e -> salvar());
-        btnCancelar.setOnAction(e -> cancelar());
+    private void carregarCategorias() {
+        categorias.clear();
+        categorias.addAll(categoriaService.listarTodas());
+        comboCategoriaPai.getItems().setAll(categorias);
     }
 
-    private void carregar() {
-        masterData.setAll(service.listarTodas());
-        cbCategoriaPai.setItems(masterData);
+    private void configurarSelecaoTabela() {
+        tableCategorias.getSelectionModel().selectedItemProperty()
+                .addListener((obs, old, sel) -> {
+                    if (sel != null && modoAtual == Modo.VISUALIZACAO) {
+                        preencherFormulario(sel);
+                    }
+                });
     }
 
-    private void novo() {
-        editando = null;
-        limparFormulario();
-        modoEdicao("Novo registro");
-    }
-
-    private void iniciarEdicao(Categoria c) {
-        editando = c;
+    private void preencherFormulario(Categoria c) {
         txtNome.setText(c.getNome());
         txtDescricao.setText(c.getDescricao());
-        cbCategoriaPai.setValue(c.getCategoriaPai());
         chkAtivo.setSelected(c.isAtivo());
-        modoEdicao("Editando: " + c.getNome());
-    }
-
-    private void salvar() {
-        if (txtNome.getText().isBlank()) {
-            alerta("Nome é obrigatório.");
-            return;
+        if (c.getCategoriaPai() != null) {
+            comboCategoriaPai.getSelectionModel().select(c.getCategoriaPai());
+        } else {
+            comboCategoriaPai.getSelectionModel().clearSelection();
         }
-        try {
-            Categoria alvo = editando != null ? editando : new Categoria();
-            alvo.setNome(txtNome.getText().trim());
-            alvo.setDescricao(txtDescricao.getText().trim());
-            alvo.setCategoriaPai(cbCategoriaPai.getValue());
-            alvo.setAtivo(chkAtivo.isSelected());
-
-            if (editando == null) {
-                service.salvar(alvo);
-                masterData.add(alvo);
-                alerta("Categoria criada.");
-            } else {
-                service.atualizar(alvo);
-                carregar();
-                alerta("Categoria atualizada.");
-            }
-            cancelar();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            alerta("Erro: " + ex.getMessage());
-        }
-    }
-
-    private void excluir(Categoria c) {
-        Alert conf = new Alert(Alert.AlertType.CONFIRMATION,
-            "Excluir categoria '" + c.getNome() + "'?", ButtonType.YES, ButtonType.NO);
-        conf.showAndWait().ifPresent(bt -> {
-            if (bt == ButtonType.YES) {
-                try {
-                    service.excluir(c.getId());
-                    masterData.remove(c);
-                } catch (Exception e) {
-                    alerta("Não foi possível excluir: " + e.getMessage());
-                }
-            }
-        });
-    }
-
-    private void cancelar() {
-        limparFormulario();
-        modoVisualizacao();
     }
 
     private void limparFormulario() {
         txtNome.clear();
         txtDescricao.clear();
-        cbCategoriaPai.setValue(null);
         chkAtivo.setSelected(true);
+        comboCategoriaPai.getSelectionModel().clearSelection();
     }
 
-    private void modoEdicao(String info) {
-        btnSalvar.setDisable(false);
-        btnCancelar.setDisable(false);
-        btnNova.setDisable(true);
-        lblInfo.setText(info);
+    private void aplicarModo(Modo modo) {
+        modoAtual = modo;
+        switch (modo) {
+            case VISUALIZACAO -> {
+                lblModo.setText("Modo: visualização");
+                btnNova.setDisable(false);
+                btnSalvar.setDisable(true);
+                btnCancelar.setDisable(true);
+                setCamposEditable(false);
+            }
+            case NOVO -> {
+                lblModo.setText("Modo: novo");
+                btnNova.setDisable(true);
+                btnSalvar.setDisable(false);
+                btnCancelar.setDisable(false);
+                setCamposEditable(true);
+            }
+            case EDICAO -> {
+                lblModo.setText("Modo: edição");
+                btnNova.setDisable(true);
+                btnSalvar.setDisable(false);
+                btnCancelar.setDisable(false);
+                setCamposEditable(true);
+            }
+        }
     }
 
-    private void modoVisualizacao() {
-        btnSalvar.setDisable(true);
-        btnCancelar.setDisable(true);
-        btnNova.setDisable(false);
-        lblInfo.setText("Modo: visualização");
+    private void setCamposEditable(boolean editable) {
+        txtNome.setDisable(!editable);
+        txtDescricao.setDisable(!editable);
+        comboCategoriaPai.setDisable(!editable);
+        chkAtivo.setDisable(!editable);
     }
 
-    private void alerta(String msg) {
-        Alert a = new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK);
-        a.setHeaderText(null);
+    private void aplicarFiltro(String termo) {
+        if (termo == null || termo.isBlank()) {
+            tableCategorias.setItems(categorias);
+            return;
+        }
+        String t = termo.toLowerCase();
+        tableCategorias.setItems(categorias.filtered(c ->
+                (c.getNome() != null && c.getNome().toLowerCase().contains(t)) ||
+                        (c.getDescricao() != null && c.getDescricao().toLowerCase().contains(t))
+        ));
+    }
+
+    @FXML
+    private void onNova() {
+        categoriaEmEdicao = null;
+        limparFormulario();
+        aplicarModo(Modo.NOVO);
+    }
+
+    @FXML
+    private void onCancelar() {
+        categoriaEmEdicao = null;
+        limparFormulario();
+        aplicarModo(Modo.VISUALIZACAO);
+        tableCategorias.getSelectionModel().clearSelection();
+    }
+
+    @FXML
+    private void onSalvar() {
+        try {
+            if (!validarFormulario()) return;
+
+            if (categoriaEmEdicao == null) {
+                Categoria nova = new Categoria();
+                nova.setNome(txtNome.getText().trim());
+                nova.setDescricao(txtDescricao.getText().trim());
+                nova.setCategoriaPai(comboCategoriaPai.getValue());
+                nova.setAtivo(chkAtivo.isSelected());
+                Date agora = new Date();
+                nova.setDataCriacao(agora);
+                nova.setDataAtualizacao(agora);
+                categoriaService.salvar(nova);
+            } else {
+                categoriaEmEdicao.setNome(txtNome.getText().trim());
+                categoriaEmEdicao.setDescricao(txtDescricao.getText().trim());
+                categoriaEmEdicao.setCategoriaPai(comboCategoriaPai.getValue());
+                categoriaEmEdicao.setAtivo(chkAtivo.isSelected());
+                categoriaEmEdicao.setDataAtualizacao(new Date());
+                categoriaService.atualizar(categoriaEmEdicao);
+            }
+
+            carregarCategorias();
+            aplicarModo(Modo.VISUALIZACAO);
+            limparFormulario();
+        } catch (SQLException e) {
+            mostrarErro("Erro ao salvar categoria", e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private boolean validarFormulario() {
+        if (txtNome.getText() == null || txtNome.getText().isBlank()) {
+            mostrarErro("Validação", "Nome é obrigatório.");
+            return false;
+        }
+        return true;
+    }
+
+    private void mostrarErro(String titulo, String msg) {
+        Alert a = new Alert(Alert.AlertType.ERROR);
+        a.setTitle("Erro");
+        a.setHeaderText(titulo);
+        a.setContentText(msg);
         a.showAndWait();
+    }
+
+    @FXML
+    private void onEditarExistente() {
+        Categoria sel = tableCategorias.getSelectionModel().getSelectedItem();
+        if (sel == null) return;
+        categoriaEmEdicao = sel;
+        preencherFormulario(sel);
+        aplicarModo(Modo.EDICAO);
+    }
+
+    @FXML
+    private void onRemover() {
+        Categoria sel = tableCategorias.getSelectionModel().getSelectedItem();
+        if (sel == null) return;
+        Alert conf = new Alert(Alert.AlertType.CONFIRMATION, "Remover a categoria selecionada?", ButtonType.YES, ButtonType.NO);
+        conf.showAndWait().ifPresent(bt -> {
+            if (bt == ButtonType.YES) {
+                try {
+                    categoriaService.excluir(sel.getId());
+                    carregarCategorias();
+                    limparFormulario();
+                    aplicarModo(Modo.VISUALIZACAO);
+                } catch (SQLException e) {
+                    mostrarErro("Erro ao excluir", e.getMessage());
+                }
+            }
+        });
     }
 }

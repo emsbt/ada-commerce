@@ -1,45 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<BorderPane xmlns="http://javafx.com/javafx/11.0.1"
-            xmlns:fx="http://javafx.com/fxml/1"
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="br.com.adacommerce.controller.CategoriaController">
-    <top>
-        <HBox spacing="10" styleClass="toolbar">
-            <children>
-                <Label text="Categorias" styleClass="view-title"/>
-                <TextField fx:id="txtFiltro" promptText="Filtrar por nome ou descrição..." HBox.hgrow="ALWAYS"/>
-                <Button fx:id="btnNova" text="Nova"/>
-                <Button fx:id="btnSalvar" text="Salvar" disable="true"/>
-                <Button fx:id="btnCancelar" text="Cancelar" disable="true"/>
-            </children>
-        </HBox>
-    </top>
+
     <center>
-        <TableView fx:id="tblCategorias" prefHeight="600">
-            <columns>
-                <TableColumn fx:id="colNome" text="Nome" prefWidth="180"/>
-                <TableColumn fx:id="colDescricao" text="Descrição" prefWidth="260"/>
-                <TableColumn fx:id="colPai" text="Categoria Pai" prefWidth="160"/>
-                <TableColumn fx:id="colAtivo" text="Ativo" prefWidth="70"/>
-                <TableColumn fx:id="colAcoes" text="Ações" prefWidth="120"/>
-            </columns>
-            <placeholder>
-                <Label text="Nenhuma categoria cadastrada."/>
-            </placeholder>
-        </TableView>
-    </center>
-    <right>
-        <VBox spacing="8" prefWidth="320" styleClass="form-panel">
-            <children>
-                <Label text="Edição / Cadastro" styleClass="form-title"/>
-                <TextField fx:id="txtNome" promptText="Nome"/>
-                <TextArea fx:id="txtDescricao" promptText="Descrição" prefRowCount="3"/>
-                <ComboBox fx:id="cbCategoriaPai" promptText="Categoria Pai (opcional)" />
-                <CheckBox fx:id="chkAtivo" text="Ativo" selected="true"/>
-                <Separator/>
-                <Label fx:id="lblInfo" text="Modo: visualização" styleClass="info-label"/>
-            </children>
+        <VBox spacing="6">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <HBox spacing="8">
+                <Label text="Categorias" style="-fx-font-weight:bold; -fx-font-size:14;"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="txtFiltro" promptText="Filtrar por nome ou descrição..."/>
+                <Button fx:id="btnNova" text="Nova" onAction="#onNova"/>
+                <Button fx:id="btnSalvar" text="Salvar" onAction="#onSalvar" disable="true"/>
+                <Button fx:id="btnCancelar" text="Cancelar" onAction="#onCancelar" disable="true"/>
+            </HBox>
+
+            <SplitPane dividerPositions="0.65">
+                <items>
+                    <VBox spacing="4">
+                        <TableView fx:id="tableCategorias" prefHeight="400">
+                            <columns>
+                                <TableColumn fx:id="colNome" text="Nome" prefWidth="160"/>
+                                <TableColumn fx:id="colDescricao" text="Descrição" prefWidth="220"/>
+                                <TableColumn fx:id="colCategoriaPai" text="Categoria Pai" prefWidth="140"/>
+                                <TableColumn fx:id="colAtivo" text="Ativo" prefWidth="70"/>
+                            </columns>
+                        </TableView>
+                        <Label text="Dica: clique em uma categoria para visualizar/editar."
+                               style="-fx-font-size:11; -fx-text-fill:#555;"/>
+                    </VBox>
+
+                    <VBox spacing="6">
+                        <padding>
+                            <Insets top="8" right="8" bottom="8" left="8"/>
+                        </padding>
+                        <Label fx:id="lblModo" text="Modo: visualização" style="-fx-font-weight:bold;"/>
+                        <Label text="Nome:"/>
+                        <TextField fx:id="txtNome" disable="true"/>
+                        <Label text="Descrição:"/>
+                        <TextArea fx:id="txtDescricao" prefRowCount="4" disable="true"/>
+                        <Label text="Categoria Pai:"/>
+                        <ComboBox fx:id="comboCategoriaPai" promptText="(opcional)" disable="true"/>
+                        <CheckBox fx:id="chkAtivo" text="Ativo" selected="true" disable="true"/>
+                        <Pane VBox.vgrow="ALWAYS"/>
+                        <HBox spacing="6">
+                            <Button text="Editar" onAction="#onEditarExistente"/>
+                            <Button text="Remover" onAction="#onRemover"/>
+                        </HBox>
+                    </VBox>
+                </items>
+            </SplitPane>
         </VBox>
-    </right>
+    </center>
 </BorderPane>

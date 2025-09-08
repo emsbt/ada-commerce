@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.adacommerce.controller.PedidosController">
+
+    <center>
+        <VBox spacing="8">
+            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+            <HBox spacing="6">
+                <Label text="Pedidos" style="-fx-font-weight:bold; -fx-font-size:14;"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <Button text="Novo Pedido" onAction="#onNovo"/>
+                <Button text="Salvar Rascunho" fx:id="btnSalvar" onAction="#onSalvar" disable="true"/>
+                <Button text="Confirmar" fx:id="btnConfirmar" onAction="#onConfirmar" disable="true"/>
+                <Button text="Cancelar" fx:id="btnCancelar" onAction="#onCancelar" disable="true"/>
+            </HBox>
+            <SplitPane dividerPositions="0.55">
+                <items>
+                    <VBox spacing="4">
+                        <TableView fx:id="tablePedidos" prefHeight="380">
+                            <columns>
+                                <TableColumn fx:id="colNumero" text="Número" prefWidth="120"/>
+                                <TableColumn fx:id="colCliente" text="Cliente" prefWidth="180"/>
+                                <TableColumn fx:id="colStatus" text="Status" prefWidth="90"/>
+                                <TableColumn fx:id="colTotal" text="Total" prefWidth="90"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                    <VBox spacing="6">
+                        <padding><Insets top="6" right="6" bottom="6" left="6"/></padding>
+                        <Label fx:id="lblModo" text="Modo: visualização" style="-fx-font-weight:bold;"/>
+                        <Label text="Número:"/>
+                        <TextField fx:id="txtNumero" disable="true"/>
+                        <Label text="Cliente:"/>
+                        <ComboBox fx:id="comboCliente" disable="true"/>
+                        <Label text="Desconto:"/>
+                        <TextField fx:id="txtDesconto" disable="true"/>
+                        <Label text="Itens:"/>
+                        <TableView fx:id="tableItens" prefHeight="160">
+                            <columns>
+                                <TableColumn fx:id="colItemProduto" text="Produto" prefWidth="160"/>
+                                <TableColumn fx:id="colItemQuantidade" text="Qtd" prefWidth="60"/>
+                                <TableColumn fx:id="colItemPreco" text="Preço" prefWidth="80"/>
+                                <TableColumn fx:id="colItemSubtotal" text="Subtotal" prefWidth="80"/>
+                            </columns>
+                        </TableView>
+                        <HBox spacing="6">
+                            <Button text="+ Item" fx:id="btnAddItem" onAction="#onAddItem" disable="true"/>
+                            <Button text="- Item" fx:id="btnRemItem" onAction="#onRemItem" disable="true"/>
+                        </HBox>
+                        <Label fx:id="lblTotais" text="Total: 0.00 | Bruto: 0.00"/>
+                    </VBox>
+                </items>
+            </SplitPane>
+        </VBox>
+    </center>
+</BorderPane>

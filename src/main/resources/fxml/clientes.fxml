@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="br.com.adacommerce.controller.ClientesController">
+
+    <center>
+        <VBox spacing="8">
+            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+            <HBox spacing="6">
+                <Label text="Clientes" style="-fx-font-weight:bold; -fx-font-size:14;"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="txtFiltro" promptText="Filtro..."/>
+                <Button text="Novo" onAction="#onNovo"/>
+                <Button text="Salvar" fx:id="btnSalvar" onAction="#onSalvar" disable="true"/>
+                <Button text="Cancelar" fx:id="btnCancelar" onAction="#onCancelar" disable="true"/>
+            </HBox>
+            <SplitPane dividerPositions="0.6">
+                <items>
+                    <VBox>
+                        <TableView fx:id="tableClientes" prefHeight="380">
+                            <columns>
+                                <TableColumn fx:id="colNome" text="Nome" prefWidth="180"/>
+                                <TableColumn fx:id="colEmail" text="Email" prefWidth="180"/>
+                                <TableColumn fx:id="colDocumento" text="Doc" prefWidth="100"/>
+                                <TableColumn fx:id="colAtivo" text="Ativo" prefWidth="60"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                    <VBox spacing="6">
+                        <padding><Insets top="6" right="6" bottom="6" left="6"/></padding>
+                        <Label fx:id="lblModo" text="Modo: visualização" style="-fx-font-weight:bold;"/>
+                        <Label text="Nome:"/>
+                        <TextField fx:id="txtNome" disable="true"/>
+                        <Label text="Email:"/>
+                        <TextField fx:id="txtEmail" disable="true"/>
+                        <Label text="Documento:"/>
+                        <TextField fx:id="txtDocumento" disable="true"/>
+                        <Label text="Telefone:"/>
+                        <TextField fx:id="txtTelefone" disable="true"/>
+                        <CheckBox fx:id="chkAtivo" text="Ativo" selected="true" disable="true"/>
+                        <Pane VBox.vgrow="ALWAYS"/>
+                        <HBox spacing="6">
+                            <Button text="Editar" onAction="#onEditar"/>
+                            <Button text="Remover" onAction="#onRemover"/>
+                        </HBox>
+                    </VBox>
+                </items>
+            </SplitPane>
+        </VBox>
+    </center>
+</BorderPane>
