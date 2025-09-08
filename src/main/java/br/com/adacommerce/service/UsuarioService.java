@@ -1,69 +1,46 @@
 package br.com.adacommerce.service;
 
+import br.com.adacommerce.model.Usuario;
 import br.com.adacommerce.config.DatabaseConfig;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Serviço de autenticação simples.
- * Aceita login via email OU usuario (texto plano, sem BCrypt).
- * Mantém fallback caso a coluna 'usuario' ainda não exista no banco.
- * IMPORTANTE: comparar senha em texto plano não é seguro para produção.
- */
 public class UsuarioService {
-
-    /**
-     * Autentica usando email OU usuario.
-     * @param login valor digitado (email ou usuario)
-     * @param senhaDigitada senha digitada em texto
-     * @return true se credenciais válidas
-     */
-    public boolean autenticar(String login, String senhaDigitada) {
-        String sql = "SELECT senha FROM usuario WHERE ativo = 1 AND (email = ? OR usuario = ?)";
-
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, login);
-            stmt.setString(2, login);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    String senhaArmazenada = rs.getString("senha");
-                    return senhaDigitada != null && senhaDigitada.equals(senhaArmazenada);
-                }
+    public List<Usuario> listar() {
+        List<Usuario> lista = new ArrayList<>();
+        String sql = "SELECT * FROM usuario ORDER BY id DESC";
+        try (Connection c = DatabaseConfig.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Usuario u = new Usuario();
+                u.setId(rs.getInt("id"));
+                u.setNome(rs.getString("nome"));
+                u.setEmail(rs.getString("email"));
+                u.setUsuario(rs.getString("usuario"));
+                u.setSenha(rs.getString("senha"));
+                u.setAtivo(rs.getInt("ativo") == 1);
+                lista.add(u);
             }
-        } catch (SQLException e) {
-            // Fallback: coluna 'usuario' pode não existir ainda
-            if (e.getMessage() != null && e.getMessage().contains("no such column: usuario")) {
-                return autenticarSomenteEmail(login, senhaDigitada);
-            }
-            System.err.println("Erro ao autenticar usuário: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Erro inesperado na autenticação: " + e.getMessage());
+            e.printStackTrace();
         }
-        return false;
+        return lista;
     }
 
-    // Modo legado: apenas email
-    private boolean autenticarSomenteEmail(String email, String senhaDigitada) {
-        String sql = "SELECT senha FROM usuario WHERE email = ? AND ativo = 1";
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, email);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    String senhaArmazenada = rs.getString("senha");
-                    return senhaDigitada != null && senhaDigitada.equals(senhaArmazenada);
-                }
-            }
+    public void salvar(Usuario u) {
+        String sql = "INSERT INTO usuario (nome,email,senha,usuario,ativo) VALUES (?,?,?,?,1)";
+        try (Connection c = DatabaseConfig.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, u.getNome());
+            ps.setString(2, u.getEmail());
+            ps.setString(3, u.getSenha());
+            ps.setString(4, u.getUsuario());
+            ps.executeUpdate();
         } catch (Exception e) {
-            System.err.println("Erro ao autenticar (fallback email): " + e.getMessage());
+            e.printStackTrace();
         }
-        return false;
     }
 }

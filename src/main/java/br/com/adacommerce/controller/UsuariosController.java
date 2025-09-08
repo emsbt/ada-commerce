@@ -1,107 +1,60 @@
 package br.com.adacommerce.controller;
 
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import br.com.adacommerce.model.Usuario;
+import br.com.adacommerce.service.UsuarioService;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class UsuariosController {
 
-    @FXML private TableView<UsuarioVM> tableUsuarios;
-    @FXML private TableColumn<UsuarioVM, String> colLogin;
-    @FXML private TableColumn<UsuarioVM, String> colNome;
-    @FXML private TableColumn<UsuarioVM, Boolean> colAtivo;
+    @FXML private TableView<Usuario> tableUsuarios;
+    @FXML private TableColumn<Usuario, String> colNome;
+    @FXML private TableColumn<Usuario, String> colEmail;
+    @FXML private TableColumn<Usuario, String> colUsuario;
+    @FXML private TableColumn<Usuario, Boolean> colAtivo;
 
-    @FXML private TextField txtLogin;
     @FXML private TextField txtNome;
+    @FXML private TextField txtEmail;
+    @FXML private TextField txtUsuario;
     @FXML private PasswordField txtSenha;
-    @FXML private CheckBox chkAtivo;
     @FXML private Button btnSalvar;
-    @FXML private Button btnCancelar;
 
-    private final ObservableList<UsuarioVM> dados = FXCollections.observableArrayList();
-    private UsuarioVM emEdicao;
+    private final UsuarioService usuarioService = new UsuarioService();
+    private final ObservableList<Usuario> usuarios = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-        colLogin.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().login()));
-        colNome.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().nome()));
-        colAtivo.setCellValueFactory(c -> new SimpleBooleanProperty(c.getValue().ativo()));
-        colAtivo.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Boolean item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : (item ? "Sim" : "Não"));
-            }
-        });
-        tableUsuarios.setItems(dados);
-
-        dados.addAll(
-                new UsuarioVM("admin","Administrador", true),
-                new UsuarioVM("joao","João Silva", true),
-                new UsuarioVM("maria","Maria Souza", false)
-        );
-
-        tableUsuarios.getSelectionModel().selectedItemProperty()
-                .addListener((o, old, sel) -> {
-                    if (sel != null && btnSalvar.isDisabled()) preencher(sel);
-                });
+        colNome.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getNome()));
+        colEmail.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getEmail()));
+        colUsuario.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getUsuario()));
+        colAtivo.setCellValueFactory(data -> new javafx.beans.property.SimpleBooleanProperty(data.getValue().isAtivo()));
+        tableUsuarios.setItems(usuarios);
+        listarUsuarios();
     }
 
-    @FXML
-    private void onNovo() {
-        limpar();
-        setEdicao(true);
-        emEdicao = null;
+    private void listarUsuarios() {
+        usuarios.setAll(usuarioService.listar());
     }
 
     @FXML
     private void onSalvar() {
-        if (txtLogin.getText().isBlank()) { alerta("Login é obrigatório"); return; }
-        if (emEdicao == null) {
-            dados.add(new UsuarioVM(txtLogin.getText(), txtNome.getText(), chkAtivo.isSelected()));
-        } else {
-            dados.remove(emEdicao);
-            dados.add(new UsuarioVM(txtLogin.getText(), txtNome.getText(), chkAtivo.isSelected()));
-        }
-        dados.sort((a,b) -> a.login().compareToIgnoreCase(b.login()));
-        limpar();
-        setEdicao(false);
+        Usuario u = new Usuario();
+        u.setNome(txtNome.getText());
+        u.setEmail(txtEmail.getText());
+        u.setUsuario(txtUsuario.getText());
+        u.setSenha(txtSenha.getText());
+        u.setAtivo(true);
+        usuarioService.salvar(u);
+        listarUsuarios();
+        limparCampos();
     }
 
-    @FXML
-    private void onCancelar() {
-        limpar();
-        setEdicao(false);
-    }
-
-    private void preencher(UsuarioVM vm) {
-        txtLogin.setText(vm.login());
-        txtNome.setText(vm.nome());
-        chkAtivo.setSelected(vm.ativo());
-    }
-
-    private void limpar() {
-        txtLogin.clear();
+    private void limparCampos() {
         txtNome.clear();
+        txtEmail.clear();
+        txtUsuario.clear();
         txtSenha.clear();
-        chkAtivo.setSelected(true);
     }
-
-    private void setEdicao(boolean ed) {
-        txtLogin.setDisable(!ed);
-        txtNome.setDisable(!ed);
-        txtSenha.setDisable(!ed);
-        chkAtivo.setDisable(!ed);
-        btnSalvar.setDisable(!ed);
-        btnCancelar.setDisable(!ed);
-    }
-
-    private void alerta(String msg) {
-        new Alert(Alert.AlertType.WARNING, msg, ButtonType.OK).showAndWait();
-    }
-
-    public record UsuarioVM(String login, String nome, boolean ativo) {}
 }

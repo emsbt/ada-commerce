@@ -71,9 +71,10 @@ public class PedidoService {
 
     private void inserir(Pedido p) throws SQLException {
         String sql = """
-            INSERT INTO pedido (cliente_id,data_criacao,status_pedido,status_pagamento)
-            VALUES (?,?,?,?)
-            """;
+        INSERT INTO pedido (cliente_id,data_criacao,status_pedido,status_pagamento)
+        VALUES (?,?,?,?)
+        """;
+        // Garanta que a data sempre seja preenchida!
         if (p.getDataPedido() == null) p.setDataPedido(new Date());
         if (p.getStatus() == null) p.setStatus(PedidoStatus.RASCUNHO);
         try (PreparedStatement ps = DatabaseConfig.getConnection()

@@ -3,6 +3,7 @@ package br.com.adacommerce.controller;
 import br.com.adacommerce.session.AuthSession;
 import br.com.adacommerce.util.ViewLoader;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -65,7 +66,7 @@ public class MainController {
     @FXML private void menuClientes()   { load("/fxml/clientes.fxml",   "Clientes"); }
     @FXML private void menuProdutos()   { load("/fxml/produtos.fxml",   "Produtos"); }
     @FXML private void menuPedidos()    { load("/fxml/pedidos.fxml",    "Pedidos"); }
-    @FXML private void menuConfiguracoes() { setStatus("Configurações (não implementado)"); }
+    @FXML private void menuUsuarios() { load("/fxml/usuarios.fxml", "Usuários"); }
 
     @FXML
     private void menuLogout() {
@@ -91,4 +92,5 @@ public class MainController {
     private void menuSair() {
         Platform.exit();
     }
+
 }

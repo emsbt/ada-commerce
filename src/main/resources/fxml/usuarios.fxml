@@ -1,47 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.geometry.Insets?>
-
-<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="br.com.adacommerce.controller.UsuariosController">
-
-    <center>
-        <VBox spacing="8">
-            <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </padding>
-
-            <HBox spacing="6">
-                <Label text="Usuários" style="-fx-font-weight:bold; -fx-font-size:14;"/>
-                <Pane HBox.hgrow="ALWAYS"/>
-                <Button text="Novo" onAction="#onNovo"/>
-                <Button text="Salvar" fx:id="btnSalvar" onAction="#onSalvar" disable="true"/>
-                <Button text="Cancelar" fx:id="btnCancelar" onAction="#onCancelar" disable="true"/>
-            </HBox>
-
-            <TableView fx:id="tableUsuarios" prefHeight="300">
-                <columns>
-                    <TableColumn fx:id="colLogin" text="Login" prefWidth="150"/>
-                    <TableColumn fx:id="colNome" text="Nome" prefWidth="250"/>
-                    <TableColumn fx:id="colAtivo" text="Ativo" prefWidth="80"/>
-                </columns>
-            </TableView>
-
-            <TitledPane text="Detalhes" expanded="true">
-                <content>
-                    <GridPane hgap="8" vgap="6">
-                        <Label text="Login:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtLogin" disable="true" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-                        <Label text="Nome:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <TextField fx:id="txtNome" disable="true" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-                        <Label text="Senha:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                        <PasswordField fx:id="txtSenha" disable="true" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-                        <CheckBox fx:id="chkAtivo" text="Ativo" selected="true" disable="true"
-                                  GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-                    </GridPane>
-                </content>
-            </TitledPane>
-        </VBox>
-    </center>
-</BorderPane>
+<?import javafx.scene.layout.*?>
+<VBox spacing="8" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml" fx:controller="br.com.adacommerce.controller.UsuariosController">
+    <HBox spacing="6">
+        <TextField fx:id="txtNome" promptText="Nome"/>
+        <TextField fx:id="txtEmail" promptText="Email"/>
+        <TextField fx:id="txtUsuario" promptText="Usuário"/>
+        <PasswordField fx:id="txtSenha" promptText="Senha"/>
+        <Button text="Salvar" fx:id="btnSalvar" onAction="#onSalvar"/>
+    </HBox>
+    <TableView fx:id="tableUsuarios" prefHeight="250">
+        <columns>
+            <TableColumn fx:id="colNome" text="Nome"/>
+            <TableColumn fx:id="colEmail" text="Email"/>
+            <TableColumn fx:id="colUsuario" text="Usuário"/>
+            <TableColumn fx:id="colAtivo" text="Ativo"/>
+        </columns>
+    </TableView>
+</VBox>

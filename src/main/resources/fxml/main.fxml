@@ -25,17 +25,12 @@
                                 <MenuItem text="Categorias" onAction="#menuCategorias"/>
                                 <MenuItem text="Clientes" onAction="#menuClientes"/>
                                 <MenuItem text="Produtos" onAction="#menuProdutos"/>
+                                <MenuItem text="Usuários" onAction="#menuUsuarios"/>
                             </items>
                         </Menu>
                         <Menu text="Operações">
                             <items>
                                 <MenuItem text="Pedidos" onAction="#menuPedidos"/>
-                            </items>
-                        </Menu>
-                        <!-- Remova este Menu inteiro se não quiser “Sistema” -->
-                        <Menu text="Sistema">
-                            <items>
-                                <MenuItem text="Configurações" onAction="#menuConfiguracoes"/>
                             </items>
                         </Menu>
                     </menus>
