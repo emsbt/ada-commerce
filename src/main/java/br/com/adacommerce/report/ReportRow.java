@@ -4,9 +4,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ReportRow {
-    private final LinkedHashMap<String,Object> cols = new LinkedHashMap<>();
+    private final Map<String,Object> data = new LinkedHashMap<>();
 
-    public void put(String col, Object value) { cols.put(col, value); }
-    public Object get(String col) { return cols.get(col); }
-    public Map<String,Object> asMap() { return cols; }
+    public void put(String key, Object value) { data.put(key, value); }
+    public Object get(String key) { return data.get(key); }
+    public Map<String,Object> asMap() { return data; }
+
+    @Override
+    public String toString() { return data.toString(); }
 }

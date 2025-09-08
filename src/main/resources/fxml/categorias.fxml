@@ -7,20 +7,21 @@
             fx:controller="br.com.adacommerce.controller.CategoriasController">
 
     <left>
-        <VBox spacing="8" prefWidth="300" style="-fx-padding:12;">
+        <VBox spacing="8" prefWidth="320" style="-fx-padding:12;">
             <children>
                 <Label text="Cadastro de Categoria" style="-fx-font-size:15; -fx-font-weight:bold;"/>
                 <TextField fx:id="txtNome" promptText="Nome da Categoria"/>
                 <TextArea fx:id="txtDescricao" prefRowCount="3" promptText="Descrição"/>
                 <ComboBox fx:id="cbCategoriaPai" promptText="Categoria Pai (opcional)" maxWidth="1.7976931348623157E308"/>
-                <CheckBox fx:id="chkAtivo" text="Ativo"/>
+                <CheckBox fx:id="chkAtivo" text="Ativo" selected="true"/>
                 <HBox spacing="10">
                     <children>
                         <Button text="Salvar" onAction="#onSalvar"/>
                         <Button text="Limpar" onAction="#onLimpar"/>
+                        <Button text="Excluir" onAction="#onExcluir"/>
                     </children>
                 </HBox>
-                <Label fx:id="lblMensagem"/>
+                <Label fx:id="lblMensagem" textFill="crimson"/>
             </children>
         </VBox>
     </left>

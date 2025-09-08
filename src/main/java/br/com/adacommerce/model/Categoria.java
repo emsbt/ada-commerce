@@ -11,6 +11,9 @@ public class Categoria {
     private Date dataCriacao = new Date();
     private Date dataAtualizacao = new Date();
 
+    public Categoria() {} // construtor explícito (opcional)
+
+    // Getters/Setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public String getNome() { return nome; }
@@ -25,5 +28,11 @@ public class Categoria {
     public void setDataCriacao(Date dataCriacao) { this.dataCriacao = dataCriacao; }
     public Date getDataAtualizacao() { return dataAtualizacao; }
     public void setDataAtualizacao(Date dataAtualizacao) { this.dataAtualizacao = dataAtualizacao; }
-    @Override public String toString() { return nome; }
+
+    public String getNomeCategoriaPai() {
+        return categoriaPai == null ? "" : categoriaPai.getNome();
+    }
+
+    @Override
+    public String toString() { return nome; }
 }

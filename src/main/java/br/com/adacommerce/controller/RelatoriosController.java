@@ -1,6 +1,8 @@
 package br.com.adacommerce.controller;
 
-import br.com.adacommerce.report.*;
+import br.com.adacommerce.report.ReportRow;
+import br.com.adacommerce.report.ReportService;
+import br.com.adacommerce.report.ReportType;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -39,8 +41,7 @@ public class RelatoriosController {
 
     private void atualizarDescricao() {
         var t = cbTipo.getValue();
-        if (t == null) txtDescricao.setText("");
-        else txtDescricao.setText(t.getDescricao()); // supondo getDescricao() senão use switch
+        txtDescricao.setText(t == null ? "" : t.getDescricao());
     }
 
     @FXML
@@ -83,12 +84,12 @@ public class RelatoriosController {
 
     @FXML
     public void onExportar() {
-        // (implemente se quiser — já mandamos antes)
-        lblStatus.setText("Exportação não implementada neste snippet.");
+        // Implementar exportação se desejar
+        lblStatus.setText("Exportação não implementada.");
     }
 
-    private Double parseDouble(String s){ if(s==null||s.isBlank()) return null; try{return Double.valueOf(s.replace(",","."));}catch(Exception e){return null;}}
-    private Integer parseInt(String s){ if(s==null||s.isBlank()) return null; try{return Integer.valueOf(s);}catch(Exception e){return null;}}
+    private Double parseDouble(String s){ if(s==null||s.isBlank()) return null; try{return Double.valueOf(s.replace(",","."));}catch(Exception e){return null;} }
+    private Integer parseInt(String s){ if(s==null||s.isBlank()) return null; try{return Integer.valueOf(s);}catch(Exception e){return null;} }
 
     public static class ReportRowWrapper {
         private final ReportRow row;

@@ -2,7 +2,10 @@ package br.com.adacommerce.report;
 
 import br.com.adacommerce.config.DatabaseConfig;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,14 +17,15 @@ public class ReportService {
                                     LocalDate fim,
                                     Double valorOpcional,
                                     Integer limite) throws SQLException {
+
         if (inicio == null || fim == null) throw new IllegalArgumentException("Datas início e fim são obrigatórias");
         if (fim.isBefore(inicio)) throw new IllegalArgumentException("Data final antes da inicial");
 
         return switch (type) {
             case FATURAMENTO_POR_DIA -> faturamentoPorDia(inicio, fim);
             case TICKET_MEDIO -> ticketMedioPorDia(inicio, fim);
-            case PRODUTOS_MAIS_VENDIDOS -> produtosMaisVendidos(inicio, fim, limite != null? limite:10);
-            case RANKING_CLIENTES -> rankingClientes(inicio, fim, limite != null? limite:10);
+            case PRODUTOS_MAIS_VENDIDOS -> produtosMaisVendidos(inicio, fim, limite != null ? limite : 10);
+            case RANKING_CLIENTES -> rankingClientes(inicio, fim, limite != null ? limite : 10);
             case PEDIDOS_POR_STATUS -> pedidosPorStatus(inicio, fim);
             case VENDAS_POR_CLIENTE -> vendasPorClienteDetalhado(inicio, fim, valorOpcional);
         };
@@ -39,7 +43,8 @@ public class ReportService {
             ORDER BY dia
             """;
         List<ReportRow> out = new ArrayList<>();
-        try (PreparedStatement ps = DatabaseConfig.getConnection().prepareStatement(sql)) {
+        try (Connection c = DatabaseConfig.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, ini.toString());
             ps.setString(2, fim.toString());
             try (ResultSet rs = ps.executeQuery()) {
@@ -68,7 +73,8 @@ public class ReportService {
             ORDER BY dia
             """;
         List<ReportRow> out = new ArrayList<>();
-        try (PreparedStatement ps = DatabaseConfig.getConnection().prepareStatement(sql)) {
+        try (Connection c = DatabaseConfig.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, ini.toString());
             ps.setString(2, fim.toString());
             try (ResultSet rs = ps.executeQuery()) {
@@ -85,32 +91,31 @@ public class ReportService {
         return out;
     }
 
-    private List<ReportRow> produtosMaisVendidos(LocalDate ini, LocalDate fim, int limit) throws SQLException {
+    private List<ReportRow> produtosMaisVendidos(LocalDate ini, LocalDate fim, int limite) throws SQLException {
         String sql = """
-            SELECT i.produto_id,
-                   i.produto_nome_snapshot nome,
-                   SUM(i.quantidade) total_qtd,
-                   SUM(i.quantidade * i.preco_unitario) total_venda
-            FROM pedido p
-            JOIN itens_pedido i ON i.pedido_id = p.id
-            WHERE p.status_pedido='CONFIRMADO'
-              AND date(p.data_criacao) BETWEEN ? AND ?
-            GROUP BY i.produto_id, i.produto_nome_snapshot
-            ORDER BY total_qtd DESC
+            SELECT p.nome,
+                   SUM(i.quantidade) quantidade,
+                   SUM(i.quantidade * i.preco_unitario) total
+            FROM itens_pedido i
+            JOIN pedido p2 ON p2.id = i.pedido_id
+            JOIN produto p ON p.id = i.produto_id
+            WHERE date(p2.data_criacao) BETWEEN ? AND ?
+            GROUP BY p.nome
+            ORDER BY quantidade DESC
             LIMIT ?
             """;
         List<ReportRow> out = new ArrayList<>();
-        try (PreparedStatement ps = DatabaseConfig.getConnection().prepareStatement(sql)) {
+        try (Connection c = DatabaseConfig.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, ini.toString());
             ps.setString(2, fim.toString());
-            ps.setInt(3, limit);
+            ps.setInt(3, limite);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ReportRow r = new ReportRow();
-                    r.put("Produto ID", rs.getInt("produto_id"));
-                    r.put("Nome", rs.getString("nome"));
-                    r.put("Quantidade", rs.getInt("total_qtd"));
-                    r.put("Total Venda", rs.getDouble("total_venda"));
+                    r.put("Produto", rs.getString("nome"));
+                    r.put("Quantidade", rs.getInt("quantidade"));
+                    r.put("Total", rs.getDouble("total"));
                     out.add(r);
                 }
             }
@@ -118,32 +123,29 @@ public class ReportService {
         return out;
     }
 
-    private List<ReportRow> rankingClientes(LocalDate ini, LocalDate fim, int limit) throws SQLException {
+    private List<ReportRow> rankingClientes(LocalDate ini, LocalDate fim, int limite) throws SQLException {
         String sql = """
-            SELECT p.cliente_id,
-                   COALESCE(c.nome,'(sem cliente)') nome,
-                   COUNT(DISTINCT p.id) pedidos,
+            SELECT c.nome,
                    SUM(i.quantidade * i.preco_unitario) total
             FROM pedido p
-            LEFT JOIN cliente c ON c.id = p.cliente_id
+            JOIN cliente c ON c.id = p.cliente_id
             JOIN itens_pedido i ON i.pedido_id = p.id
-            WHERE p.status_pedido='CONFIRMADO'
-              AND date(p.data_criacao) BETWEEN ? AND ?
-            GROUP BY p.cliente_id, nome
+            WHERE date(p.data_criacao) BETWEEN ? AND ?
+              AND p.status_pedido='CONFIRMADO'
+            GROUP BY c.nome
             ORDER BY total DESC
             LIMIT ?
             """;
         List<ReportRow> out = new ArrayList<>();
-        try (PreparedStatement ps = DatabaseConfig.getConnection().prepareStatement(sql)) {
+        try (Connection c = DatabaseConfig.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, ini.toString());
             ps.setString(2, fim.toString());
-            ps.setInt(3, limit);
+            ps.setInt(3, limite);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ReportRow r = new ReportRow();
-                    r.put("Cliente ID", rs.getInt("cliente_id"));
-                    r.put("Nome", rs.getString("nome"));
-                    r.put("Pedidos", rs.getInt("pedidos"));
+                    r.put("Cliente", rs.getString("nome"));
                     r.put("Total", rs.getDouble("total"));
                     out.add(r);
                 }
@@ -154,25 +156,23 @@ public class ReportService {
 
     private List<ReportRow> pedidosPorStatus(LocalDate ini, LocalDate fim) throws SQLException {
         String sql = """
-            SELECT p.status_pedido status,
-                   COUNT(DISTINCT p.id) qtd,
-                   SUM(i.quantidade * i.preco_unitario) faturamento
-            FROM pedido p
-            LEFT JOIN itens_pedido i ON i.pedido_id = p.id
-            WHERE date(p.data_criacao) BETWEEN ? AND ?
-            GROUP BY p.status_pedido
-            ORDER BY qtd DESC
+            SELECT status_pedido,
+                   COUNT(*) quantidade
+            FROM pedido
+            WHERE date(data_criacao) BETWEEN ? AND ?
+            GROUP BY status_pedido
+            ORDER BY status_pedido
             """;
         List<ReportRow> out = new ArrayList<>();
-        try (PreparedStatement ps = DatabaseConfig.getConnection().prepareStatement(sql)) {
+        try (Connection c = DatabaseConfig.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, ini.toString());
             ps.setString(2, fim.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ReportRow r = new ReportRow();
-                    r.put("Status", rs.getString("status"));
-                    r.put("Pedidos", rs.getInt("qtd"));
-                    r.put("Faturamento", rs.getDouble("faturamento"));
+                    r.put("Status", rs.getString("status_pedido"));
+                    r.put("Quantidade", rs.getInt("quantidade"));
                     out.add(r);
                 }
             }
@@ -180,39 +180,36 @@ public class ReportService {
         return out;
     }
 
-    private List<ReportRow> vendasPorClienteDetalhado(LocalDate ini, LocalDate fim, Double minimo) throws SQLException {
-        String sql = """
-            SELECT p.id pedido_id,
+    private List<ReportRow> vendasPorClienteDetalhado(LocalDate ini, LocalDate fim, Double valorMinimo) throws SQLException {
+        String base = """
+            SELECT c.nome cliente,
+                   p.id pedido_id,
                    date(p.data_criacao) dia,
-                   COALESCE(c.nome,'(sem cliente)') cliente,
-                   SUM(i.quantidade * i.preco_unitario) total
+                   SUM(i.quantidade * i.preco_unitario) valor_pedido
             FROM pedido p
+            JOIN cliente c ON c.id = p.cliente_id
             JOIN itens_pedido i ON i.pedido_id = p.id
-            LEFT JOIN cliente c ON c.id = p.cliente_id
-            WHERE p.status_pedido='CONFIRMADO'
-              AND date(p.data_criacao) BETWEEN ? AND ?
-            GROUP BY p.id, dia, cliente
-            HAVING (? IS NULL OR total >= ?)
-            ORDER BY total DESC
+            WHERE date(p.data_criacao) BETWEEN ? AND ?
+            GROUP BY c.nome, p.id, date(p.data_criacao)
+            HAVING 1=1
             """;
+        if (valorMinimo != null) {
+            base += " AND valor_pedido >= ? ";
+        }
+        base += " ORDER BY valor_pedido DESC";
         List<ReportRow> out = new ArrayList<>();
-        try (PreparedStatement ps = DatabaseConfig.getConnection().prepareStatement(sql)) {
+        try (Connection c = DatabaseConfig.getConnection();
+             PreparedStatement ps = c.prepareStatement(base)) {
             ps.setString(1, ini.toString());
             ps.setString(2, fim.toString());
-            if (minimo == null) {
-                ps.setNull(3, Types.DOUBLE);
-                ps.setNull(4, Types.DOUBLE);
-            } else {
-                ps.setDouble(3, minimo);
-                ps.setDouble(4, minimo);
-            }
+            if (valorMinimo != null) ps.setDouble(3, valorMinimo);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ReportRow r = new ReportRow();
-                    r.put("Pedido ID", rs.getInt("pedido_id"));
-                    r.put("Dia", rs.getString("dia"));
                     r.put("Cliente", rs.getString("cliente"));
-                    r.put("Total", rs.getDouble("total"));
+                    r.put("Pedido", rs.getInt("pedido_id"));
+                    r.put("Dia", rs.getString("dia"));
+                    r.put("Valor Pedido", rs.getDouble("valor_pedido"));
                     out.add(r);
                 }
             }

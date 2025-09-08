@@ -1,102 +1,53 @@
 package br.com.adacommerce.controller;
 
 import br.com.adacommerce.session.AuthSession;
-import br.com.adacommerce.util.ViewLoader;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 
 public class MainController {
 
-    @FXML private BorderPane root;
-    @FXML private StackPane contentRoot;
-    @FXML private Label lblTitulo;
-    @FXML private Label lblUsuarioLogado;
+    @FXML private StackPane contentArea;
+    @FXML private Label lblUsuario;
     @FXML private Label lblStatus;
-    @FXML private MenuBar menuBar;
+    @FXML private Label lblTitulo;
 
     @FXML
     public void initialize() {
-        debug("initialize: root=" + root + " contentRoot=" + contentRoot + " menuBar=" + menuBar);
-        if (lblUsuarioLogado != null) {
-            String user = AuthSession.getUsuarioLogado();
-            lblUsuarioLogado.setText(user != null ? user : "(não logado)");
+        if (lblUsuario != null) {
+            lblUsuario.setText("Usuário: " + (AuthSession.getUsuarioLogado() == null ? "admin" : AuthSession.getUsuarioLogado()));
         }
-        load("/fxml/dashboard.fxml", "Dashboard");
+        abrirRelatorios(); // carrega relatório padrão
     }
 
-    private void debug(String msg) {
-        System.out.println("[MainController] " + msg);
+    @FXML public void abrirRelatorios() { carregar("/fxml/relatorios.fxml", "Relatórios", "Tela de Relatórios"); }
+    @FXML public void abrirCategorias() { carregar("/fxml/categorias.fxml", "Categorias", "Gerenciamento de Categorias"); }
+    @FXML public void abrirClientes()   { carregar("/fxml/clientes.fxml", "Clientes", "Cadastro de Clientes"); }
+    @FXML public void abrirProdutos()   { carregar("/fxml/produtos.fxml", "Produtos", "Cadastro de Produtos"); }
+    @FXML public void abrirPedidos()    { carregar("/fxml/pedidos.fxml", "Pedidos", "Gestão de Pedidos"); }
+    @FXML public void abrirConfig()     { carregar("/fxml/configuracoes.fxml", "Configurações", "Preferências do Sistema"); }
+
+    @FXML public void onLogout() {
+        AuthSession.clear();
+        // Você pode voltar para login se tiver tela de login
+        // ...
+        System.exit(0);
     }
 
-    private void setCenter(Node n) {
-        if (contentRoot != null) {
-            contentRoot.getChildren().setAll(n);
-        } else {
-            root.setCenter(n);
-        }
-    }
+    @FXML public void onSair() { System.exit(0); }
 
-    private void load(String path, String titulo) {
+    private void carregar(String fxml, String titulo, String status) {
         try {
-            Node n = ViewLoader.loadNode(path);
-            setCenter(n);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
+            Parent root = loader.load();
+            contentArea.getChildren().setAll(root);
             if (lblTitulo != null) lblTitulo.setText(titulo);
-            setStatus("Carregado: " + titulo);
+            if (lblStatus != null) lblStatus.setText(status);
         } catch (Exception e) {
+            if (lblStatus != null) lblStatus.setText("Erro carregando: " + fxml + " - " + e.getMessage());
             e.printStackTrace();
-            setStatus("Erro ao carregar: " + path);
         }
-    }
-
-    private void setStatus(String msg) {
-        if (lblStatus != null) lblStatus.setText(msg);
-    }
-
-    private Stage currentStage() {
-        if (root != null && root.getScene() != null) return (Stage) root.getScene().getWindow();
-        if (contentRoot != null && contentRoot.getScene() != null) return (Stage) contentRoot.getScene().getWindow();
-        if (menuBar != null && menuBar.getScene() != null) return (Stage) menuBar.getScene().getWindow();
-        throw new IllegalStateException("Stage não disponível (root/contentRoot/menuBar não injetados). Verifique fx:id e fx:controller.");
-    }
-
-    // Menus
-    @FXML private void menuClientes()   { load("/fxml/clientes.fxml",   "Clientes"); }
-    @FXML private void menuProdutos()   { load("/fxml/produtos.fxml",   "Produtos"); }
-    @FXML private void menuPedidos()    { load("/fxml/pedidos.fxml",    "Pedidos"); }
-    @FXML private void menuRelatorios() { load("/fxml/relatorios.fxml", "Relatórios"); }
-    @FXML private void menuCategorias() { load("/fxml/categorias.fxml", "Categorias"); }
-    @FXML private void menuUsuarios()   { load("/fxml/usuarios.fxml",   "Usuários"); }
-
-    @FXML
-    private void menuLogout() {
-        debug("menuLogout acionado");
-        Alert a = new Alert(Alert.AlertType.CONFIRMATION,
-                "Deseja realmente encerrar a sessão?", ButtonType.YES, ButtonType.NO);
-        a.setHeaderText("Logout");
-        a.showAndWait().ifPresent(bt -> {
-            debug("Button: " + bt);
-            if (bt == ButtonType.YES) {
-                AuthSession.clear();
-                Stage stage = currentStage();
-                debug("Fechando stage principal: " + stage);
-                stage.close();
-                try {
-                    ViewLoader.openOnNewStage("/fxml/login.fxml", "Login");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-    @FXML
-    private void menuSair() {
-        debug("menuSair acionado");
-        Platform.exit();
     }
 }
