@@ -2,45 +2,44 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
-<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="br.com.adacommerce.controller.RelatoriosController">
 
-    <center>
-        <VBox spacing="10">
-            <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
-
-            <Label text="Relatórios" style="-fx-font-weight:bold; -fx-font-size:16;"/>
-
-            <HBox spacing="8">
-                <Label text="Tipo:"/>
-                <ComboBox fx:id="comboTipo" prefWidth="240"/>
-
-                <Label text="Início:"/>
-                <DatePicker fx:id="dtInicio"/>
-
-                <Label text="Fim:"/>
-                <DatePicker fx:id="dtFim"/>
-
-                <Label text="Valor:"/>
-                <TextField fx:id="txtParametro" promptText="Limite / valor opcional" prefWidth="100"/>
-
+    <top>
+        <ToolBar>
+            <items>
+                <ComboBox fx:id="cbTipo" prefWidth="200"/>
+                <DatePicker fx:id="dpInicio"/>
+                <DatePicker fx:id="dpFim"/>
+                <TextField fx:id="tfValorOpcional" promptText="Valor opcional" prefWidth="110"/>
+                <TextField fx:id="tfLimite" promptText="Limite" prefWidth="70"/>
                 <Button text="Gerar" onAction="#onGerar"/>
-                <Button text="Exportar CSV" fx:id="btnExportar" disable="true" onAction="#onExportar"/>
-            </HBox>
+                <Button fx:id="btnExportar" text="Exportar CSV" onAction="#onExportar" disable="true"/>
+            </items>
+        </ToolBar>
+    </top>
 
-            <TableView fx:id="tableResultados" prefHeight="420"/>
+    <center>
+        <TableView fx:id="table"/>
+    </center>
 
-            <HBox spacing="12">
-                <Label fx:id="lblResumo" text="" style="-fx-font-weight:bold;"/>
-                <Pane HBox.hgrow="ALWAYS"/>
-                <ProgressIndicator fx:id="progress" visible="false" prefWidth="28" prefHeight="28"/>
-            </HBox>
-
+    <bottom>
+        <VBox spacing="4">
             <TitledPane text="Descrição do Relatório" expanded="false">
                 <content>
-                    <TextArea fx:id="txtDescricao" editable="false" wrapText="true" prefRowCount="3"/>
+                    <TextArea fx:id="txtDescricao" wrapText="true" prefRowCount="2"/>
                 </content>
             </TitledPane>
+            <HBox spacing="10">
+                <children>
+                    <Label fx:id="lblStatus" text="Pronto."/>
+                </children>
+                <padding>
+                    <Insets top="5" right="5" bottom="5" left="5"/>
+                </padding>
+            </HBox>
         </VBox>
-    </center>
+    </bottom>
 </BorderPane>

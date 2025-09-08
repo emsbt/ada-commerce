@@ -1,8 +1,8 @@
-package br.com.adacommerce.repository.sqlite;
+package br.com.adacommerce.repository.old.sqlite;
 
 import br.com.adacommerce.config.DatabaseConfig;
 import br.com.adacommerce.domain.cliente.Cliente;
-import br.com.adacommerce.repository.ClienteRepository;
+import br.com.adacommerce.repository.old.ClienteRepository;
 
 import java.sql.*;
 import java.util.ArrayList;

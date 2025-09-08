@@ -1,43 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
 
-<BorderPane prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.adacommerce.controller.PrincipalController">
-    <top>
-        <HBox styleClass="toolbar">
-            <children>
-                <Label text="Ada Commerce - Gerenciamento de Categorias" />
-            </children>
-        </HBox>
-    </top>
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.adacommerce.controller.CategoriasController">
+
     <left>
-        <VBox prefWidth="350.0" styleClass="form-container">
+        <VBox spacing="8" prefWidth="320" style="-fx-padding:12;">
             <children>
-                <Label text="Cadastro de Categoria" style="-fx-font-size: 16; -fx-font-weight: bold;" />
-                <TextField fx:id="txtNome" promptText="Nome da Categoria" />
-                <TextArea fx:id="txtDescricao" prefRowCount="3" promptText="Descrição" />
-                <ComboBox fx:id="cbCategoriaPai" promptText="Categoria Pai (opcional)" maxWidth="1.7976931348623157E308" />
-                <CheckBox fx:id="chkAtivo" text="Ativo" />
+                <Label text="Cadastro de Categoria" style="-fx-font-size:15; -fx-font-weight:bold;"/>
+                <TextField fx:id="txtNome" promptText="Nome da Categoria"/>
+                <TextArea fx:id="txtDescricao" prefRowCount="3" promptText="Descrição"/>
+                <ComboBox fx:id="cbCategoriaPai" promptText="Categoria Pai (opcional)" maxWidth="1.7976931348623157E308"/>
+                <CheckBox fx:id="chkAtivo" text="Ativo"/>
                 <HBox spacing="10">
                     <children>
-                        <Button fx:id="btnSalvar" styleClass="btn-primary" text="Salvar" />
-                        <Button fx:id="btnLimpar" styleClass="btn-secondary" text="Limpar" />
+                        <Button text="Salvar" onAction="#onSalvar"/>
+                        <Button text="Limpar" onAction="#onLimpar"/>
                     </children>
                 </HBox>
+                <Label fx:id="lblMensagem" textFill="#444"/>
             </children>
         </VBox>
     </left>
+
     <center>
-        <VBox>
+        <VBox spacing="6" style="-fx-padding:10;">
             <children>
-                <Label text="Categorias Cadastradas" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-padding: 10;" />
-                <TableView fx:id="tblCategorias" prefHeight="400.0">
+                <Label text="Categorias Cadastradas"
+                       style="-fx-font-size:15; -fx-font-weight:bold;"/>
+                <TableView fx:id="tblCategorias" prefHeight="400">
                     <columns>
-                        <TableColumn fx:id="colNome" prefWidth="150.0" text="Nome" />
-                        <TableColumn fx:id="colDescricao" prefWidth="200.0" text="Descrição" />
-                        <TableColumn fx:id="colPai" prefWidth="150.0" text="Categoria Pai" />
-                        <TableColumn fx:id="colAtivo" prefWidth="80.0" text="Ativo" />
+                        <TableColumn fx:id="colNome" prefWidth="150" text="Nome"/>
+                        <TableColumn fx:id="colDescricao" prefWidth="200" text="Descrição"/>
+                        <TableColumn fx:id="colPai" prefWidth="150" text="Categoria Pai"/>
+                        <TableColumn fx:id="colAtivo" prefWidth="80" text="Ativo"/>
                     </columns>
                 </TableView>
             </children>

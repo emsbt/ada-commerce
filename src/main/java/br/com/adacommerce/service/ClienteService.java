@@ -10,39 +10,31 @@ import java.util.List;
 
 public class ClienteService {
 
-    public void criarTabelasSeNaoExistir() throws SQLException {
-        String sql = """
-                CREATE TABLE IF NOT EXISTS cliente (
-                  id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  nome TEXT NOT NULL,
-                  email TEXT,
-                  documento TEXT,
-                  telefone TEXT,
-                  ativo INTEGER NOT NULL DEFAULT 1,
-                  data_criacao TIMESTAMP NOT NULL,
-                  data_atualizacao TIMESTAMP NOT NULL
-                );
-                """;
-        try (Statement st = DatabaseConfig.getConnection().createStatement()) {
-            st.execute(sql);
+    public void salvar(Cliente c) throws SQLException {
+        if (c.getId() == null) {
+            inserir(c);
+        } else {
+            atualizar(c);
         }
     }
 
-    public void salvar(Cliente c) throws SQLException {
+    private void inserir(Cliente c) throws SQLException {
         String sql = """
-            INSERT INTO cliente (nome, email, documento, telefone, ativo, data_criacao, data_atualizacao)
+            INSERT INTO cliente (nome,email,documento,telefone,ativo,data_criacao,data_atualizacao)
             VALUES (?,?,?,?,?,?,?)
             """;
+        Date agora = new Date();
+        if (c.getDataCriacao() == null) c.setDataCriacao(agora);
+        c.setDataAtualizacao(agora);
         try (PreparedStatement ps = DatabaseConfig.getConnection()
                 .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, c.getNome());
             ps.setString(2, c.getEmail());
             ps.setString(3, c.getDocumento());
             ps.setString(4, c.getTelefone());
-            ps.setBoolean(5, c.isAtivo());
-            Timestamp agora = new Timestamp(new Date().getTime());
-            ps.setTimestamp(6, agora);
-            ps.setTimestamp(7, agora);
+            ps.setInt(5, c.isAtivo() ? 1 : 0);
+            ps.setTimestamp(6, new Timestamp(c.getDataCriacao().getTime()));
+            ps.setTimestamp(7, new Timestamp(c.getDataAtualizacao().getTime()));
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) c.setId(rs.getInt(1));
@@ -52,16 +44,26 @@ public class ClienteService {
 
     public void atualizar(Cliente c) throws SQLException {
         String sql = """
-            UPDATE cliente SET nome=?, email=?, documento=?, telefone=?, ativo=?, data_atualizacao=? WHERE id=?
+            UPDATE cliente SET nome=?, email=?, documento=?, telefone=?, ativo=?, data_atualizacao=?
+            WHERE id=?
             """;
+        c.setDataAtualizacao(new Date());
         try (PreparedStatement ps = DatabaseConfig.getConnection().prepareStatement(sql)) {
             ps.setString(1, c.getNome());
             ps.setString(2, c.getEmail());
             ps.setString(3, c.getDocumento());
             ps.setString(4, c.getTelefone());
-            ps.setBoolean(5, c.isAtivo());
-            ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+            ps.setInt(5, c.isAtivo() ? 1 : 0);
+            ps.setTimestamp(6, new Timestamp(c.getDataAtualizacao().getTime()));
             ps.setInt(7, c.getId());
+            ps.executeUpdate();
+        }
+    }
+
+    public void excluir(int id) throws SQLException {
+        try (PreparedStatement ps = DatabaseConfig.getConnection()
+                .prepareStatement("DELETE FROM cliente WHERE id=?")) {
+            ps.setInt(1, id);
             ps.executeUpdate();
         }
     }
@@ -78,7 +80,7 @@ public class ClienteService {
                 c.setEmail(rs.getString("email"));
                 c.setDocumento(rs.getString("documento"));
                 c.setTelefone(rs.getString("telefone"));
-                c.setAtivo(rs.getBoolean("ativo"));
+                c.setAtivo(rs.getInt("ativo") == 1);
                 c.setDataCriacao(rs.getTimestamp("data_criacao"));
                 c.setDataAtualizacao(rs.getTimestamp("data_atualizacao"));
                 lista.add(c);

@@ -1,4 +1,4 @@
-package br.com.adacommerce.repository;
+package br.com.adacommerce.repository.old;
 
 import br.com.adacommerce.domain.produto.Produto;
 

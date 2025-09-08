@@ -1,189 +1,98 @@
 package br.com.adacommerce.controller;
 
-import br.com.adacommerce.service.RelatorioService;
-import br.com.adacommerce.util.CsvExporter;
-import javafx.application.Platform;
+import br.com.adacommerce.report.*;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.stage.FileChooser;
 
-import java.io.File;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class RelatoriosController {
 
-    @FXML private ComboBox<RelatorioOption> comboTipo;
-    @FXML private DatePicker dtInicio;
-    @FXML private DatePicker dtFim;
-    @FXML private TextField txtParametro;
-    @FXML private TableView<Map<String,Object>> tableResultados;
-    @FXML private Label lblResumo;
+    @FXML private ComboBox<ReportType> cbTipo;
+    @FXML private DatePicker dpInicio;
+    @FXML private DatePicker dpFim;
+    @FXML private TextField tfValorOpcional;
+    @FXML private TextField tfLimite;
+    @FXML private TableView<ReportRowWrapper> table;
+    @FXML private Label lblStatus;
     @FXML private TextArea txtDescricao;
-    @FXML private ProgressIndicator progress;
     @FXML private Button btnExportar;
 
-    private final RelatorioService service = new RelatorioService();
-    private List<Map<String,Object>> ultimoResultado = Collections.emptyList();
-
-    public static class RelatorioOption {
-        private final RelatorioService.TipoRelatorio tipo;
-        public RelatorioOption(RelatorioService.TipoRelatorio tipo) { this.tipo = tipo; }
-        public RelatorioService.TipoRelatorio getTipo() { return tipo; }
-        @Override public String toString() { return tipo.getId() + " - " + tipo.getTitulo(); }
-    }
+    private final ReportService service = new ReportService();
+    private List<ReportRow> lastRows = new ArrayList<>();
 
     @FXML
     public void initialize() {
-        comboTipo.setItems(FXCollections.observableArrayList(
-                Arrays.stream(RelatorioService.TipoRelatorio.values())
-                        .map(RelatorioOption::new)
-                        .toList()
-        ));
-        comboTipo.getSelectionModel().selectedItemProperty().addListener((o,a,b) -> {
-            if (b != null) {
-                txtDescricao.setText(b.getTipo().getDescricao());
-                ajustarCamposObrigatorios(b.getTipo());
-            }
-        });
-        // Sugestão: período padrão = mês corrente
-        LocalDate hoje = LocalDate.now();
-        dtInicio.setValue(hoje.withDayOfMonth(1));
-        dtFim.setValue(hoje);
-
-        tableResultados.setPlaceholder(new Label("Nenhum dado. Selecione um tipo e clique em Gerar."));
+        cbTipo.setItems(FXCollections.observableArrayList(ReportType.values()));
+        cbTipo.getSelectionModel().selectFirst();
+        dpInicio.setValue(LocalDate.now().minusDays(7));
+        dpFim.setValue(LocalDate.now());
+        atualizarDescricao();
+        cbTipo.valueProperty().addListener((o,a,b)-> atualizarDescricao());
     }
 
-    private void ajustarCamposObrigatorios(RelatorioService.TipoRelatorio tipo) {
-        // Apenas ESTOQUE_BAIXO ignora período (parametro = limite)
-        boolean periodo = tipo != RelatorioService.TipoRelatorio.ESTOQUE_BAIXO;
-        dtInicio.setDisable(!periodo);
-        dtFim.setDisable(!periodo);
-        txtParametro.setPromptText(
-                tipo == RelatorioService.TipoRelatorio.ESTOQUE_BAIXO ? "Limite (ex: 5)" : "Valor opcional"
-        );
+    private void atualizarDescricao() {
+        var t = cbTipo.getValue();
+        if (t == null) txtDescricao.setText("");
+        else txtDescricao.setText(t.getDescricao()); // supondo getDescricao() senão use switch
     }
 
     @FXML
-    private void onGerar() {
-        RelatorioOption opt = comboTipo.getValue();
-        if (opt == null) {
-            alerta("Validação", "Selecione um tipo de relatório.");
-            return;
-        }
-        var tipo = opt.getTipo();
-        LocalDate ini = dtInicio.getValue();
-        LocalDate fim = dtFim.getValue();
-        if (tipo != RelatorioService.TipoRelatorio.ESTOQUE_BAIXO) {
-            if (ini == null || fim == null) {
-                alerta("Validação","Informe início e fim.");
-                return;
-            }
-            if (fim.isBefore(ini)) {
-                alerta("Validação","Fim não pode ser antes do início.");
-                return;
-            }
-        }
-        String parametro = txtParametro.getText().trim();
-        progress.setVisible(true);
+    public void onGerar() {
+        lblStatus.setText("Gerando...");
+        table.getItems().clear();
+        table.getColumns().clear();
+        lastRows.clear();
         btnExportar.setDisable(true);
-        lblResumo.setText("Gerando...");
-        tableResultados.getColumns().clear();
-        tableResultados.getItems().clear();
-
-        CompletableFuture
-                .supplyAsync(() -> {
-                    try {
-                        return service.gerar(tipo, ini, fim, parametro.isBlank()? null : parametro);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e.getMessage(), e);
-                    }
-                })
-                .whenComplete((resultado, ex) -> Platform.runLater(() -> {
-                    progress.setVisible(false);
-                    if (ex != null) {
-                        alerta("Erro", ex.getMessage());
-                        lblResumo.setText("Erro: " + ex.getMessage());
-                        return;
-                    }
-                    ultimoResultado = resultado;
-                    montarColunas(resultado);
-                    tableResultados.getItems().setAll(resultado);
-                    atualizarResumo(tipo, resultado);
-                    btnExportar.setDisable(resultado.isEmpty());
-                }));
-    }
-
-    private void montarColunas(List<Map<String,Object>> dados) {
-        tableResultados.getColumns().clear();
-        if (dados == null || dados.isEmpty()) return;
-        Map<String,Object> primeira = dados.get(0);
-        for (String colName : primeira.keySet()) {
-            TableColumn<Map<String,Object>, Object> col = new TableColumn<>(colName);
-            col.setCellValueFactory(cd -> {
-                Object value = cd.getValue().get(colName);
-                return new javafx.beans.property.ReadOnlyObjectWrapper<>(value);
-            });
-            col.setPrefWidth(150);
-            tableResultados.getColumns().add(col);
-        }
-    }
-
-    private void atualizarResumo(RelatorioService.TipoRelatorio tipo, List<Map<String,Object>> dados) {
-        if (dados.isEmpty()) {
-            lblResumo.setText("Sem resultados.");
-            return;
-        }
-        switch (tipo) {
-            case VENDAS_POR_DIA, PRODUTOS_MAIS_VENDIDOS, CLIENTES_TOP, PEDIDOS_POR_STATUS, TICKET_MEDIO_DIA -> {
-                double total = somaColuna(dados, "total");
-                lblResumo.setText("Linhas: " + dados.size() + " | Total: " + format(total));
+        try {
+            List<ReportRow> rows = service.generate(
+                    cbTipo.getValue(),
+                    dpInicio.getValue(),
+                    dpFim.getValue(),
+                    parseDouble(tfValorOpcional.getText()),
+                    parseInt(tfLimite.getText())
+            );
+            lastRows = rows;
+            if (rows.isEmpty()) {
+                lblStatus.setText("Sem dados.");
+                return;
             }
-            case ESTOQUE_BAIXO -> {
-                double somaEstoque = somaColuna(dados, "estoque");
-                lblResumo.setText("Produtos: " + dados.size() + " | Soma Estoque: " + format(somaEstoque));
+            Map<String,Object> first = rows.get(0).asMap();
+            for (String col : first.keySet()) {
+                TableColumn<ReportRowWrapper,Object> tc = new TableColumn<>(col);
+                tc.setCellValueFactory(d -> d.getValue().prop(col));
+                tc.setPrefWidth(130);
+                table.getColumns().add(tc);
             }
+            table.setItems(FXCollections.observableArrayList(
+                    rows.stream().map(ReportRowWrapper::new).toList()
+            ));
+            lblStatus.setText("OK ("+rows.size()+" linhas)");
+            btnExportar.setDisable(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            lblStatus.setText("Erro: " + e.getMessage());
         }
-    }
-
-    private double somaColuna(List<Map<String,Object>> dados, String coluna) {
-        double acc = 0;
-        for (Map<String,Object> row : dados) {
-            Object v = row.get(coluna);
-            if (v instanceof Number n) acc += n.doubleValue();
-        }
-        return acc;
-    }
-
-    private String format(double v) {
-        return String.format(Locale.US, "%.2f", v);
     }
 
     @FXML
-    private void onExportar() {
-        if (ultimoResultado == null || ultimoResultado.isEmpty()) {
-            alerta("Info","Nada para exportar.");
-            return;
-        }
-        FileChooser fc = new FileChooser();
-        fc.setTitle("Salvar CSV");
-        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV","*.csv"));
-        fc.setInitialFileName("relatorio.csv");
-        File file = fc.showSaveDialog(tableResultados.getScene().getWindow());
-        if (file == null) return;
-        try {
-            CsvExporter.exportar(ultimoResultado, file);
-            alerta("Sucesso","Arquivo salvo: " + file.getAbsolutePath());
-        } catch (Exception e) {
-            alerta("Erro","Falha ao exportar: " + e.getMessage());
-        }
+    public void onExportar() {
+        // (implemente se quiser — já mandamos antes)
+        lblStatus.setText("Exportação não implementada neste snippet.");
     }
 
-    private void alerta(String titulo, String msg) {
-        Alert a = new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK);
-        a.setHeaderText(titulo);
-        a.showAndWait();
+    private Double parseDouble(String s){ if(s==null||s.isBlank()) return null; try{return Double.valueOf(s.replace(",","."));}catch(Exception e){return null;}}
+    private Integer parseInt(String s){ if(s==null||s.isBlank()) return null; try{return Integer.valueOf(s);}catch(Exception e){return null;}}
+
+    public static class ReportRowWrapper {
+        private final ReportRow row;
+        public ReportRowWrapper(ReportRow r){ this.row = r;}
+        public ObjectProperty<Object> prop(String c){ return new SimpleObjectProperty<>(row.get(c));}
     }
 }

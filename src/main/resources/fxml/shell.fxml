@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.adacommerce.controller.ShellController"
+            prefWidth="1100" prefHeight="650">
+
+    <top>
+        <VBox>
+            <children>
+                <MenuBar>
+                    <menus>
+                        <Menu text="Arquivo">
+                            <items>
+                                <MenuItem text="Logout" onAction="#onLogout"/>
+                                <SeparatorMenuItem/>
+                                <MenuItem text="Sair" onAction="#onSair"/>
+                            </items>
+                        </Menu>
+                        <Menu text="Relatórios">
+                            <items>
+                                <MenuItem text="Ver Relatórios" onAction="#abrirRelatorios"/>
+                            </items>
+                        </Menu>
+                        <Menu text="Cadastros">
+                            <items>
+                                <MenuItem text="Categorias" onAction="#abrirCategorias"/>
+                            </items>
+                        </Menu>
+                        <Menu text="Ajuda">
+                            <items>
+                                <MenuItem text="Sobre" onAction="#onSobre"/>
+                            </items>
+                        </Menu>
+                    </menus>
+                </MenuBar>
+                <ToolBar>
+                    <items>
+                        <Label fx:id="lblTitulo" style="-fx-font-size:15; -fx-font-weight:bold;" text="Relatórios"/>
+                        <Region/>
+                        <Label fx:id="lblUsuario" text="Usuário:"/>
+                    </items>
+                </ToolBar>
+            </children>
+        </VBox>
+    </top>
+
+    <center>
+        <StackPane fx:id="contentArea"/>
+    </center>
+
+    <bottom>
+        <HBox style="-fx-padding:6; -fx-background-color:#f4f4f4;">
+            <children>
+                <Label fx:id="lblStatus" text="Pronto."/>
+            </children>
+        </HBox>
+    </bottom>
+</BorderPane>

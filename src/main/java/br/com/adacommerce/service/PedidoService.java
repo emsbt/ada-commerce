@@ -4,173 +4,168 @@ import br.com.adacommerce.config.DatabaseConfig;
 import br.com.adacommerce.model.*;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class PedidoService {
 
-    private final ProdutoService produtoService = new ProdutoService();
-
-    public void criarTabelasSeNaoExistir() throws SQLException {
-        try (Statement st = DatabaseConfig.getConnection().createStatement()) {
-            st.execute("""
-                CREATE TABLE IF NOT EXISTS pedido (
-                  id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  numero TEXT NOT NULL,
-                  cliente_id INTEGER NOT NULL,
-                  data_pedido TIMESTAMP NOT NULL,
-                  status TEXT NOT NULL,
-                  total_bruto REAL NOT NULL,
-                  desconto REAL NOT NULL,
-                  total_liquido REAL NOT NULL,
-                  FOREIGN KEY(cliente_id) REFERENCES cliente(id)
-                );
-                """);
-            st.execute("""
-                CREATE TABLE IF NOT EXISTS pedido_item (
-                  id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  pedido_id INTEGER NOT NULL,
-                  produto_id INTEGER NOT NULL,
-                  quantidade INTEGER NOT NULL,
-                  preco_unitario REAL NOT NULL,
-                  subtotal REAL NOT NULL,
-                  FOREIGN KEY(pedido_id) REFERENCES pedido(id),
-                  FOREIGN KEY(produto_id) REFERENCES produto(id)
-                );
-                """);
+    public List<Pedido> listar() throws SQLException {
+        List<Pedido> lista = new ArrayList<>();
+        String sql = "SELECT * FROM pedido ORDER BY id DESC";
+        try (PreparedStatement ps = DatabaseConfig.getConnection().prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Pedido p = mapPedido(rs);
+                p.getItens().addAll(listarItens(p.getId()));
+                p.recalcularTotais();
+                lista.add(p);
+            }
         }
+        return lista;
     }
 
-    public void salvarRascunho(Pedido pedido) throws SQLException {
-        if (pedido.getId() == null) {
-            inserirPedido(pedido);
+    public void salvarRascunho(Pedido p) throws SQLException {
+        if (p.getStatus() == null) p.setStatus(PedidoStatus.RASCUNHO);
+        if (p.getId() == null) {
+            inserir(p);
         } else {
-            atualizarCabecalho(pedido);
-            excluirItens(pedido.getId());
+            atualizarCabecalho(p);
+            limparItens(p.getId());
+            inserirItens(p);
         }
-        inserirItens(pedido);
     }
 
-    private void inserirPedido(Pedido p) throws SQLException {
+    public void confirmarPedido(Pedido p) throws SQLException {
+        if (p.getId() == null) throw new SQLException("Pedido não salvo.");
+        p.setStatus(PedidoStatus.CONFIRMADO);
+        atualizarStatus(p);
+    }
+
+    public void cancelarPedido(Pedido p) throws SQLException {
+        if (p.getId() == null) throw new SQLException("Pedido não salvo.");
+        p.setStatus(PedidoStatus.CANCELADO);
+        atualizarStatus(p);
+    }
+
+    /* ================= PRIVADOS ================= */
+
+    private Pedido mapPedido(ResultSet rs) throws SQLException {
+        Pedido p = new Pedido();
+        p.setId(rs.getInt("id"));
+        p.setNumero("P" + p.getId()); // Ajuste se tiver coluna 'numero'
+        int cliId = rs.getInt("cliente_id");
+        if (!rs.wasNull()) {
+            Cliente c = new Cliente();
+            c.setId(cliId);
+            p.setCliente(c);
+        }
+        Timestamp ts = rs.getTimestamp("data_criacao");
+        if (ts != null) p.setDataPedido(new Date(ts.getTime()));
+        String statusStr = rs.getString("status_pedido");
+        if (statusStr != null) {
+            try { p.setStatus(PedidoStatus.valueOf(statusStr)); } catch (IllegalArgumentException ignore) {}
+        }
+        return p;
+    }
+
+    private void inserir(Pedido p) throws SQLException {
         String sql = """
-            INSERT INTO pedido (numero, cliente_id, data_pedido, status, total_bruto, desconto, total_liquido)
-            VALUES (?,?,?,?,?,?,?)
+            INSERT INTO pedido (cliente_id,data_criacao,status_pedido,status_pagamento)
+            VALUES (?,?,?,?)
             """;
+        if (p.getDataPedido() == null) p.setDataPedido(new Date());
+        if (p.getStatus() == null) p.setStatus(PedidoStatus.RASCUNHO);
         try (PreparedStatement ps = DatabaseConfig.getConnection()
                 .prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, p.getNumero());
-            ps.setInt(2, p.getCliente().getId());
-            ps.setTimestamp(3, new Timestamp(p.getDataPedido().getTime()));
-            ps.setString(4, p.getStatus().name());
-            ps.setDouble(5, p.getTotalBruto());
-            ps.setDouble(6, p.getDesconto());
-            ps.setDouble(7, p.getTotalLiquido());
+            if (p.getCliente()!=null && p.getCliente().getId()!=null)
+                ps.setInt(1, p.getCliente().getId());
+            else
+                ps.setNull(1, Types.INTEGER);
+            ps.setTimestamp(2, new Timestamp(p.getDataPedido().getTime()));
+            ps.setString(3, p.getStatus().name());
+            ps.setString(4, "PENDENTE");
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) p.setId(rs.getInt(1));
             }
         }
+        inserirItens(p);
     }
 
     private void atualizarCabecalho(Pedido p) throws SQLException {
         String sql = """
-            UPDATE pedido SET numero=?, cliente_id=?, data_pedido=?, status=?, total_bruto=?, desconto=?, total_liquido=?
-            WHERE id=?
+            UPDATE pedido SET cliente_id=?, status_pedido=?, status_pagamento=? WHERE id=?
             """;
         try (PreparedStatement ps = DatabaseConfig.getConnection().prepareStatement(sql)) {
-            ps.setString(1, p.getNumero());
-            ps.setInt(2, p.getCliente().getId());
-            ps.setTimestamp(3, new Timestamp(p.getDataPedido().getTime()));
-            ps.setString(4, p.getStatus().name());
-            ps.setDouble(5, p.getTotalBruto());
-            ps.setDouble(6, p.getDesconto());
-            ps.setDouble(7, p.getTotalLiquido());
-            ps.setInt(8, p.getId());
+            if (p.getCliente()!=null && p.getCliente().getId()!=null)
+                ps.setInt(1, p.getCliente().getId());
+            else
+                ps.setNull(1, Types.INTEGER);
+            ps.setString(2, p.getStatus().name());
+            ps.setString(3, "PENDENTE");
+            ps.setInt(4, p.getId());
+            ps.executeUpdate();
+        }
+    }
+
+    private void atualizarStatus(Pedido p) throws SQLException {
+        try (PreparedStatement ps = DatabaseConfig.getConnection()
+                .prepareStatement("UPDATE pedido SET status_pedido=? WHERE id=?")) {
+            ps.setString(1, p.getStatus().name());
+            ps.setInt(2, p.getId());
             ps.executeUpdate();
         }
     }
 
     private void inserirItens(Pedido p) throws SQLException {
+        if (p.getItens().isEmpty()) return;
         String sql = """
-            INSERT INTO pedido_item (pedido_id, produto_id, quantidade, preco_unitario, subtotal)
+            INSERT INTO itens_pedido (pedido_id,produto_id,produto_nome_snapshot,quantidade,preco_unitario)
             VALUES (?,?,?,?,?)
             """;
         try (PreparedStatement ps = DatabaseConfig.getConnection().prepareStatement(sql)) {
-            for (PedidoItem item : p.getItens()) {
+            for (ItemPedido it : p.getItens()) {
+                if (it.getProduto()==null || it.getProduto().getId()==null)
+                    throw new SQLException("Item sem produto.");
                 ps.setInt(1, p.getId());
-                ps.setInt(2, item.getProduto().getId());
-                ps.setInt(3, item.getQuantidade());
-                ps.setDouble(4, item.getPrecoUnitario());
-                ps.setDouble(5, item.getSubtotal());
+                ps.setInt(2, it.getProduto().getId());
+                ps.setString(3, it.getProduto().getNome());
+                ps.setInt(4, it.getQuantidade());
+                ps.setDouble(5, it.getPrecoUnitario());
                 ps.addBatch();
             }
             ps.executeBatch();
         }
     }
 
-    private void excluirItens(int pedidoId) throws SQLException {
+    private void limparItens(int pedidoId) throws SQLException {
         try (PreparedStatement ps = DatabaseConfig.getConnection()
-                .prepareStatement("DELETE FROM pedido_item WHERE pedido_id=?")) {
+                .prepareStatement("DELETE FROM itens_pedido WHERE pedido_id=?")) {
             ps.setInt(1, pedidoId);
             ps.executeUpdate();
         }
     }
 
-    public void confirmarPedido(Pedido p) throws SQLException {
-        Connection conn = DatabaseConfig.getConnection();
-        boolean auto = conn.getAutoCommit();
-        try {
-            conn.setAutoCommit(false);
-
-            // Validar estoque
-            for (PedidoItem it : p.getItens()) {
-                Produto prod = produtoService.buscarPorId(it.getProduto().getId());
-                if (prod == null) throw new SQLException("Produto não encontrado ID=" + it.getProduto().getId());
-                if (prod.getEstoqueAtual() < it.getQuantidade()) {
-                    throw new SQLException("Estoque insuficiente para produto " + prod.getNome());
+    private List<ItemPedido> listarItens(int pedidoId) throws SQLException {
+        List<ItemPedido> itens = new ArrayList<>();
+        String sql = "SELECT * FROM itens_pedido WHERE pedido_id=?";
+        try (PreparedStatement ps = DatabaseConfig.getConnection().prepareStatement(sql)) {
+            ps.setInt(1, pedidoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ItemPedido it = new ItemPedido();
+                    it.setId(rs.getInt("id"));
+                    Produto prod = new Produto();
+                    prod.setId(rs.getInt("produto_id"));
+                    prod.setNome(rs.getString("produto_nome_snapshot"));
+                    it.setProduto(prod);
+                    it.setQuantidade(rs.getInt("quantidade"));
+                    it.setPrecoUnitario(rs.getDouble("preco_unitario"));
+                    itens.add(it);
                 }
             }
-            // Debitar estoque
-            for (PedidoItem it : p.getItens()) {
-                produtoService.ajustarEstoque(it.getProduto().getId(), -it.getQuantidade());
-            }
-
-            p.setStatus(PedidoStatus.CONFIRMADO);
-            p.recalcularTotais();
-            salvarRascunho(p); // reaproveita lógica (atualiza status e itens)
-
-            conn.commit();
-        } catch (Exception ex) {
-            conn.rollback();
-            throw new SQLException("Falha ao confirmar pedido: " + ex.getMessage(), ex);
-        } finally {
-            conn.setAutoCommit(auto);
         }
-    }
-
-    public void cancelarPedido(Pedido p) throws SQLException {
-        if (p.getStatus() != PedidoStatus.CONFIRMADO) {
-            p.setStatus(PedidoStatus.CANCELADO);
-            salvarRascunho(p);
-            return;
-        }
-        Connection conn = DatabaseConfig.getConnection();
-        boolean auto = conn.getAutoCommit();
-        try {
-            conn.setAutoCommit(false);
-
-            // Repor estoque
-            for (PedidoItem it : p.getItens()) {
-                produtoService.ajustarEstoque(it.getProduto().getId(), it.getQuantidade());
-            }
-            p.setStatus(PedidoStatus.CANCELADO);
-            salvarRascunho(p);
-
-            conn.commit();
-        } catch (Exception ex) {
-            conn.rollback();
-            throw new SQLException("Erro ao cancelar pedido: " + ex.getMessage(), ex);
-        } finally {
-            conn.setAutoCommit(auto);
-        }
+        return itens;
     }
 }

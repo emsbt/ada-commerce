@@ -1,4 +1,4 @@
-package br.com.adacommerce.util;
+package br.com.adacommerce.report;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -6,38 +6,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Exporta lista de Map<String,Object> para CSV simples.
- */
 public class CsvExporter {
 
-    public static void exportar(List<Map<String,Object>> dados, File destino) throws IOException {
-        if (dados == null || dados.isEmpty()) {
-            try (Writer w = new OutputStreamWriter(new FileOutputStream(destino), StandardCharsets.UTF_8)) {
-                w.write("SEM DADOS\n");
+    public static void export(List<ReportRow> rows, File file) throws IOException {
+        if (rows == null || rows.isEmpty()) {
+            try (Writer w = writer(file)) {
+                w.write("Sem dados\n");
             }
             return;
         }
-        var headers = dados.get(0).keySet().stream().toList();
-        try (Writer w = new OutputStreamWriter(new FileOutputStream(destino), StandardCharsets.UTF_8)) {
-            // cabeçalho
-            w.write(headers.stream().map(CsvExporter::esc).collect(Collectors.joining(";")) + "\n");
-            // linhas
-            for (Map<String,Object> row : dados) {
-                String linha = headers.stream()
-                        .map(h -> esc(String.valueOf(row.get(h) == null ? "" : row.get(h))))
+        Map<String,Object> first = rows.get(0).asMap();
+        String header = first.keySet().stream().collect(Collectors.joining(";"));
+        try (Writer w = writer(file)) {
+            w.write(header);
+            w.write("\n");
+            for (ReportRow r : rows) {
+                String line = r.asMap().values().stream()
+                        .map(v -> v == null ? "" : v.toString().replace(";", ","))
                         .collect(Collectors.joining(";"));
-                w.write(linha + "\n");
+                w.write(line);
+                w.write("\n");
             }
         }
     }
 
-    private static String esc(String v) {
-        if (v == null) return "";
-        String s = v.replace("\"","\"\"");
-        if (s.contains(";") || s.contains("\"") || s.contains("\n")) {
-            return "\"" + s + "\"";
-        }
-        return s;
+    private static Writer writer(File f) throws IOException {
+        return new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8);
     }
 }

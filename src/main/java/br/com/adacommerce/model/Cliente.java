@@ -6,9 +6,9 @@ public class Cliente {
     private Integer id;
     private String nome;
     private String email;
-    private String documento; // CPF/CNPJ
+    private String documento;
     private String telefone;
-    private boolean ativo;
+    private boolean ativo = true;
     private Date dataCriacao;
     private Date dataAtualizacao;
 
@@ -28,6 +28,5 @@ public class Cliente {
     public void setDataCriacao(Date dataCriacao) { this.dataCriacao = dataCriacao; }
     public Date getDataAtualizacao() { return dataAtualizacao; }
     public void setDataAtualizacao(Date dataAtualizacao) { this.dataAtualizacao = dataAtualizacao; }
-    @Override
-    public String toString() { return nome; }
+    @Override public String toString() { return nome; }
 }

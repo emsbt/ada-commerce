@@ -9,7 +9,7 @@ public class Produto {
     private Categoria categoria;
     private double preco;
     private int estoqueAtual;
-    private boolean ativo;
+    private boolean ativo = true;
     private Date dataCriacao;
     private Date dataAtualizacao;
 
@@ -31,10 +31,5 @@ public class Produto {
     public void setDataCriacao(Date dataCriacao) { this.dataCriacao = dataCriacao; }
     public Date getDataAtualizacao() { return dataAtualizacao; }
     public void setDataAtualizacao(Date dataAtualizacao) { this.dataAtualizacao = dataAtualizacao; }
-
-    // Compatibilidade com código legado
-    public double getPrecoBase() { return preco; }
-
-    @Override
-    public String toString() { return nome; }
+    @Override public String toString() { return nome; }
 }

@@ -2,53 +2,83 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="br.com.adacommerce.controller.ClientesController">
 
-    <center>
-        <VBox spacing="8">
-            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
-            <HBox spacing="6">
-                <Label text="Clientes" style="-fx-font-weight:bold; -fx-font-size:14;"/>
-                <Pane HBox.hgrow="ALWAYS"/>
+    <top>
+        <HBox spacing="8">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <children>
+                <Label text="Clientes" style="-fx-font-size:18px;-fx-font-weight:bold;"/>
+                <Region HBox.hgrow="ALWAYS"/>
                 <TextField fx:id="txtFiltro" promptText="Filtro..."/>
-                <Button text="Novo" onAction="#onNovo"/>
-                <Button text="Salvar" fx:id="btnSalvar" onAction="#onSalvar" disable="true"/>
-                <Button text="Cancelar" fx:id="btnCancelar" onAction="#onCancelar" disable="true"/>
-            </HBox>
-            <SplitPane dividerPositions="0.6">
-                <items>
-                    <VBox>
-                        <TableView fx:id="tableClientes" prefHeight="380">
+            </children>
+        </HBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.55">
+            <items>
+                <VBox spacing="6">
+                    <padding>
+                        <Insets top="10" right="10" bottom="10" left="10"/>
+                    </padding>
+                    <children>
+                        <TableView fx:id="tableClientes" prefHeight="400" prefWidth="520">
                             <columns>
-                                <TableColumn fx:id="colNome" text="Nome" prefWidth="180"/>
-                                <TableColumn fx:id="colEmail" text="Email" prefWidth="180"/>
-                                <TableColumn fx:id="colDocumento" text="Doc" prefWidth="100"/>
+                                <TableColumn fx:id="colNome" text="Nome" prefWidth="140"/>
+                                <TableColumn fx:id="colEmail" text="Email" prefWidth="150"/>
+                                <TableColumn fx:id="colDocumento" text="Documento" prefWidth="110"/>
+                                <TableColumn fx:id="colTelefone" text="Telefone" prefWidth="100"/>
                                 <TableColumn fx:id="colAtivo" text="Ativo" prefWidth="60"/>
                             </columns>
                         </TableView>
-                    </VBox>
-                    <VBox spacing="6">
-                        <padding><Insets top="6" right="6" bottom="6" left="6"/></padding>
-                        <Label fx:id="lblModo" text="Modo: visualização" style="-fx-font-weight:bold;"/>
-                        <Label text="Nome:"/>
-                        <TextField fx:id="txtNome" disable="true"/>
-                        <Label text="Email:"/>
-                        <TextField fx:id="txtEmail" disable="true"/>
-                        <Label text="Documento:"/>
-                        <TextField fx:id="txtDocumento" disable="true"/>
-                        <Label text="Telefone:"/>
-                        <TextField fx:id="txtTelefone" disable="true"/>
-                        <CheckBox fx:id="chkAtivo" text="Ativo" selected="true" disable="true"/>
-                        <Pane VBox.vgrow="ALWAYS"/>
                         <HBox spacing="6">
-                            <Button text="Editar" onAction="#onEditar"/>
-                            <Button text="Remover" onAction="#onRemover"/>
+                            <children>
+                                <Button fx:id="btnNovo" text="Novo" onAction="#onNovo"/>
+                                <Button fx:id="btnSalvar" text="Salvar" onAction="#onSalvar"/>
+                                <Button fx:id="btnCancelar" text="Cancelar" onAction="#onCancelar"/>
+                                <Button text="Editar" onAction="#onEditar"/>
+                                <Button text="Remover" onAction="#onRemover"/>
+                            </children>
                         </HBox>
-                    </VBox>
-                </items>
-            </SplitPane>
-        </VBox>
+                    </children>
+                </VBox>
+
+                <GridPane hgap="8" vgap="8">
+                    <padding>
+                        <Insets top="12" right="12" bottom="12" left="12"/>
+                    </padding>
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="30"/>
+                        <ColumnConstraints percentWidth="70"/>
+                    </columnConstraints>
+                    <children>
+                        <Label text="Nome:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtNome" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                        <Label text="Email:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtEmail" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                        <Label text="Documento:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtDocumento" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                        <Label text="Telefone:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtTelefone" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                        <Label text="Ativo:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                        <CheckBox fx:id="chkAtivo" selected="true" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                        <Label fx:id="lblModo" text="Modo: visualização"
+                               GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+                    </children>
+                </GridPane>
+            </items>
+        </SplitPane>
     </center>
 </BorderPane>

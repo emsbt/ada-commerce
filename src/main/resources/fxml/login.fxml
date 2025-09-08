@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.layout.*?>
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="br.com.adacommerce.controller.LoginController">
-    <children>
-        <VBox spacing="10" layoutX="40" layoutY="40" prefWidth="300" prefHeight="240">
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.adacommerce.controller.LoginController"
+            prefWidth="340" prefHeight="200">
+    <center>
+        <VBox spacing="8" style="-fx-padding:18;" alignment="CENTER">
             <children>
                 <Label text="Ada Commerce" style="-fx-font-size:18; -fx-font-weight:bold;"/>
-                <Label text="Usuário:"/>
-                <TextField fx:id="txtUsuario" promptText="Informe o usuário"/>
-                <Label text="Senha:"/>
-                <PasswordField fx:id="txtSenha" promptText="Informe a senha"/>
-                <Button text="Entrar" defaultButton="true" onAction="#onEntrar" prefWidth="120"/>
+                <TextField fx:id="txtUsuario" promptText="Usuário"/>
+                <PasswordField fx:id="txtSenha" promptText="Senha"/>
+                <Button text="Entrar" onAction="#onEntrar" maxWidth="Infinity"/>
+                <Label fx:id="lblMsg" textFill="crimson"/>
             </children>
-            <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
-            </padding>
         </VBox>
-    </children>
-</AnchorPane>
+    </center>
+</BorderPane>

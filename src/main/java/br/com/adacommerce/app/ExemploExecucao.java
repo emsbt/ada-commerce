@@ -44,17 +44,17 @@ public class ExemploExecucao {
         pedido.setDataPedido(new Date());
         pedido.setStatus(PedidoStatus.RASCUNHO);
 
-        PedidoItem i1 = new PedidoItem();
+        ItemPedido i1 = new ItemPedido();
         i1.setProduto(p1);
         i1.setQuantidade(2);
         i1.setPrecoUnitario(p1.getPreco());
-        pedido.adicionarItem(i1);
 
-        PedidoItem i2 = new PedidoItem();
+
+        ItemPedido i2 = new ItemPedido();
         i2.setProduto(p2);
         i2.setQuantidade(1);
         i2.setPrecoUnitario(p2.getPreco());
-        pedido.adicionarItem(i2);
+
 
         pedido.recalcularTotais();
         pedidoService.salvarRascunho(pedido);
@@ -65,5 +65,6 @@ public class ExemploExecucao {
 
         pedidoService.cancelarPedido(pedido);
         System.out.println("Cancelado. Status=" + pedido.getStatus());
+        System.out.println("Conexão ok? " + (DatabaseConfig.getConnection()!=null));
     }
 }

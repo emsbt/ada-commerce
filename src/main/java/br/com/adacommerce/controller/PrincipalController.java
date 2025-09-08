@@ -1,114 +1,69 @@
 package br.com.adacommerce.controller;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.cell.PropertyValueFactory;
-import br.com.adacommerce.model.Categoria;
-import br.com.adacommerce.service.CategoriaService;
+import javafx.stage.Stage;
 
 public class PrincipalController {
 
     @FXML private TextField txtNome;
     @FXML private TextArea txtDescricao;
-    @FXML private ComboBox<Categoria> cbCategoriaPai;
+    @FXML private ComboBox<String> cbCategoriaPai; // ajuste o tipo conforme seu model
     @FXML private CheckBox chkAtivo;
     @FXML private Button btnSalvar;
     @FXML private Button btnLimpar;
-    @FXML private TableView<Categoria> tblCategorias;
-    @FXML private TableColumn<Categoria, String> colNome;
-    @FXML private TableColumn<Categoria, String> colDescricao;
-    @FXML private TableColumn<Categoria, String> colPai;
-    @FXML private TableColumn<Categoria, Boolean> colAtivo;
-
-    private CategoriaService categoriaService = new CategoriaService();
-    private ObservableList<Categoria> categorias = FXCollections.observableArrayList();
-    private Categoria categoriaEditando;
+    @FXML private TableView<?> tblCategorias;
+    @FXML private TableColumn<?,?> colNome;
+    @FXML private TableColumn<?,?> colDescricao;
+    @FXML private TableColumn<?,?> colPai;
+    @FXML private TableColumn<?,?> colAtivo;
+    @FXML private Label lblMensagem;
 
     @FXML
-    private void initialize() {
-        configurarTabela();
-        carregarCategorias();
-        chkAtivo.setSelected(true);
-
-        btnSalvar.setOnAction(e -> salvarCategoria());
-        btnLimpar.setOnAction(e -> limparFormulario());
-
-        tblCategorias.getSelectionModel().selectedItemProperty().addListener((obs, old, nova) -> {
-            if (nova != null) {
-                preencherFormulario(nova);
-            }
-        });
+    public void initialize() {
+        // Carregar categorias, preencher combo, etc.
+        // (Coloque sua lógica real aqui depois.)
     }
 
-    private void configurarTabela() {
-        colNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
-        colDescricao.setCellValueFactory(new PropertyValueFactory<>("descricao"));
-        colPai.setCellValueFactory(cellData -> {
-            Categoria pai = cellData.getValue().getCategoriaPai();
-            return new javafx.beans.property.SimpleStringProperty(pai != null ? pai.getNome() : "");
-        });
-        colAtivo.setCellValueFactory(new PropertyValueFactory<>("ativo"));
-        tblCategorias.setItems(categorias);
+    @FXML
+    public void onSalvar() {
+        // Lógica para salvar categoria
+        lblMensagem.setText("Categoria salva (exemplo).");
+        limparFormulario();
     }
 
-    private void carregarCategorias() {
-        categorias.clear();
-        categorias.addAll(categoriaService.listarTodas());
-        cbCategoriaPai.setItems(categorias);
-    }
-
-    private void salvarCategoria() {
-        if (txtNome.getText().trim().isEmpty()) {
-            mostrarAlerta("Nome da categoria é obrigatório!");
-            return;
-        }
-
-        Categoria categoria = categoriaEditando != null ? categoriaEditando : new Categoria();
-        categoria.setNome(txtNome.getText().trim());
-        categoria.setDescricao(txtDescricao.getText().trim());
-        categoria.setCategoriaPai(cbCategoriaPai.getValue());
-        categoria.setAtivo(chkAtivo.isSelected());
-
-        try {
-            if (categoriaEditando != null) {
-                categoriaService.atualizar(categoria);
-                mostrarAlerta("Categoria atualizada com sucesso!");
-            } else {
-                categoriaService.salvar(categoria);
-                mostrarAlerta("Categoria salva com sucesso!");
-            }
-
-            limparFormulario();
-            carregarCategorias();
-
-        } catch (Exception e) {
-            mostrarAlerta("Erro ao salvar categoria: " + e.getMessage());
-        }
-    }
-
-    private void preencherFormulario(Categoria categoria) {
-        categoriaEditando = categoria;
-        txtNome.setText(categoria.getNome());
-        txtDescricao.setText(categoria.getDescricao());
-        cbCategoriaPai.setValue(categoria.getCategoriaPai());
-        chkAtivo.setSelected(categoria.isAtivo());
+    @FXML
+    public void onLimpar() {
+        limparFormulario();
     }
 
     private void limparFormulario() {
-        categoriaEditando = null;
         txtNome.clear();
         txtDescricao.clear();
-        cbCategoriaPai.setValue(null);
-        chkAtivo.setSelected(true);
+        cbCategoriaPai.getSelectionModel().clearSelection();
+        chkAtivo.setSelected(false);
     }
 
-    private void mostrarAlerta(String mensagem) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Ada Commerce");
-        alert.setHeaderText(null);
-        alert.setContentText(mensagem);
-        alert.showAndWait();
+    @FXML
+    public void abrirRelatorios() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/relatorios.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Relatórios");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Erro abrindo Relatórios: " + e.getMessage()).showAndWait();
+        }
+    }
+
+    @FXML
+    public void onSair() {
+        System.exit(0);
     }
 }
