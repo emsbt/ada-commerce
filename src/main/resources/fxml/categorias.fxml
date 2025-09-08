@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.adacommerce.controller.CategoriaController">
+    <top>
+        <HBox spacing="10" styleClass="toolbar">
+            <children>
+                <Label text="Categorias" styleClass="view-title"/>
+                <TextField fx:id="txtFiltro" promptText="Filtrar por nome ou descrição..." HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnNova" text="Nova"/>
+                <Button fx:id="btnSalvar" text="Salvar" disable="true"/>
+                <Button fx:id="btnCancelar" text="Cancelar" disable="true"/>
+            </children>
+        </HBox>
+    </top>
+    <center>
+        <TableView fx:id="tblCategorias" prefHeight="600">
+            <columns>
+                <TableColumn fx:id="colNome" text="Nome" prefWidth="180"/>
+                <TableColumn fx:id="colDescricao" text="Descrição" prefWidth="260"/>
+                <TableColumn fx:id="colPai" text="Categoria Pai" prefWidth="160"/>
+                <TableColumn fx:id="colAtivo" text="Ativo" prefWidth="70"/>
+                <TableColumn fx:id="colAcoes" text="Ações" prefWidth="120"/>
+            </columns>
+            <placeholder>
+                <Label text="Nenhuma categoria cadastrada."/>
+            </placeholder>
+        </TableView>
+    </center>
+    <right>
+        <VBox spacing="8" prefWidth="320" styleClass="form-panel">
+            <children>
+                <Label text="Edição / Cadastro" styleClass="form-title"/>
+                <TextField fx:id="txtNome" promptText="Nome"/>
+                <TextArea fx:id="txtDescricao" promptText="Descrição" prefRowCount="3"/>
+                <ComboBox fx:id="cbCategoriaPai" promptText="Categoria Pai (opcional)" />
+                <CheckBox fx:id="chkAtivo" text="Ativo" selected="true"/>
+                <Separator/>
+                <Label fx:id="lblInfo" text="Modo: visualização" styleClass="info-label"/>
+            </children>
+        </VBox>
+    </right>
+</BorderPane>
