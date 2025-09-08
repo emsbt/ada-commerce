@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
-
-<BorderPane xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="br.com.adacommerce.controller.LoginController"
-            prefWidth="340" prefHeight="200">
+            prefWidth="340" prefHeight="210">
     <center>
-        <VBox spacing="8" style="-fx-padding:18;" alignment="CENTER">
+        <VBox spacing="8" alignment="CENTER" style="-fx-padding:18;">
             <children>
                 <Label text="Ada Commerce" style="-fx-font-size:18; -fx-font-weight:bold;"/>
                 <TextField fx:id="txtUsuario" promptText="Usuário"/>
                 <PasswordField fx:id="txtSenha" promptText="Senha"/>
                 <Button text="Entrar" onAction="#onEntrar" maxWidth="Infinity"/>
-                <Label fx:id="lblMsg" textFill="crimson"/>
+                <Label fx:id="lblErro" textFill="crimson"/>
             </children>
         </VBox>
     </center>
