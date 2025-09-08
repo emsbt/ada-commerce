@@ -35,7 +35,7 @@ public class LoginController {
 
         try {
             UsuarioService usuarioService = new UsuarioService();
-            boolean resultado = usuarioService.autenticarUsuario(usuario, senha);
+            boolean resultado = usuarioService.autenticar(usuario, senha);
             if (resultado) {
                 abrirTelaPrincipal();
             } else {
