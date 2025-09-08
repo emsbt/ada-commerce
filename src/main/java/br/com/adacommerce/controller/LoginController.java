@@ -1,39 +1,68 @@
 package br.com.adacommerce.controller;
 
+import br.com.adacommerce.service.UsuarioService;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
 public class LoginController {
-
-    @FXML private TextField txtUsuario;
-    @FXML private PasswordField txtSenha;
-    @FXML private Button btnLogin;
-    @FXML private Label lblErro;
+    @FXML
+    private TextField txtUsuario;
 
     @FXML
-    private void initialize() {
-        btnLogin.setOnAction(e -> fazerLogin());
-        txtUsuario.setOnAction(e -> fazerLogin());
-        txtSenha.setOnAction(e -> fazerLogin());
-    }
+    private PasswordField txtSenha;
 
+    @FXML
+    private Label lblErro;
+
+    @FXML
     private void fazerLogin() {
         String usuario = txtUsuario.getText();
         String senha = txtSenha.getText();
 
+        lblErro.setVisible(false);
+
         if (usuario.isEmpty() || senha.isEmpty()) {
-            lblErro.setText("Preencha todos os campos");
+            lblErro.setText("Preencha todos os campos!");
             lblErro.setVisible(true);
             return;
         }
 
-        // Por enquanto, aceita qualquer usuário/senha para testar
-        if (usuario.equals("admin") && senha.equals("admin123")) {
-            System.out.println("Login realizado com sucesso!");
-            lblErro.setVisible(false);
-        } else {
-            lblErro.setText("Usuário ou senha inválidos");
+        try {
+            UsuarioService usuarioService = new UsuarioService();
+            boolean resultado = usuarioService.autenticarUsuario(usuario, senha);
+            if (resultado) {
+                abrirTelaPrincipal();
+            } else {
+                lblErro.setText("Usuário ou senha inválidos!");
+                lblErro.setVisible(true);
+                txtSenha.clear();
+            }
+        } catch (Exception e) {
+            lblErro.setText("Erro de conexão com o banco de dados!");
             lblErro.setVisible(true);
+            System.err.println("Erro no login: " + e.getMessage());
+        }
+    }
+
+    private void abrirTelaPrincipal() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/principal.fxml"));
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Ada Commerce - Sistema Principal");
+            stage.show();
+
+            // Fechar a tela de login
+            Stage loginStage = (Stage) txtUsuario.getScene().getWindow();
+            loginStage.close();
+        } catch (Exception e) {
+            System.err.println("Erro ao abrir tela principal: " + e.getMessage());
         }
     }
 }

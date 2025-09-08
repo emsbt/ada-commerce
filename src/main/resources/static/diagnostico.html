@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ada Commerce - Diagnóstico</title>
+    <style>
+        :root {
+            --ada-blue: #1a2a6c;
+            --ada-red: #b21f1f;
+            --ada-yellow: #fdbb2d;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--ada-blue), var(--ada-red), var(--ada-yellow));
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.97);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            margin: 20px auto;
+            max-width: 1000px;
+        }
+
+        .header {
+            background: var(--ada-blue);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .terminal {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            height: 250px;
+            overflow-y: auto;
+            margin: 20px;
+        }
+
+        .warning {
+            color: #f39c12;
+        }
+
+        .error {
+            color: #e74c3c;
+        }
+
+        .success {
+            color: #2ecc71;
+        }
+
+        .info {
+            color: #3498db;
+        }
+
+        .login-panel, .diagnostic-panel {
+            padding: 30px;
+        }
+
+        .btn-ada {
+            background-color: var(--ada-blue);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .status-card {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .step-box {
+            background-color: #e9ecef;
+            border-left: 4px solid var(--ada-blue);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .code-block {
+            background-color: #2c3e50;
+            color: white;
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Ada Commerce - JavaFX</h1>
+        <p class="lead">Sistema de E-Commerce - Diagnóstico de Conexão</p>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap;">
+        <!-- Painel de Login -->
+        <div style="flex: 1; min-width: 300px; padding: 20px; border-right: 2px solid #eee;">
+            <h3 style="margin-bottom: 20px;">Login do Administrador</h3>
+            <form id="loginForm">
+                <div style="margin-bottom: 15px;">
+                    <label for="username" style="display: block; margin-bottom: 5px; font-weight: bold;">Usuário</label>
+                    <input type="text" id="username" value="admin" readonly style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="password" style="display: block; margin-bottom: 5px; font-weight: bold;">Senha</label>
+                    <input type="password" id="password" value="............" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <button type="submit" class="btn-ada">Entrar</button>
+            </form>
+
+            <div class="terminal">
+                <div class="terminal-line">[INFO] Iniciando Ada Commerce JavaFX</div>
+                <div class="terminal-line">[INFO] Verificando dependências do sistema...</div>
+                <div class="terminal-line success">[OK] Java Runtime Environment</div>
+                <div class="terminal-line success">[OK] JavaFX SDK</div>
+                <div class="terminal-line warning">[WARNING] MySQL Connection - Driver não encontrado</div>
+                <div class="terminal-line error">[ERROR] Conexão não estabelecida com o banco de dados</div>
+                <div class="terminal-line">[INFO] Verificando configurações de conexão...</div>
+                <div class="terminal-line error">[FALHA] Não foi possível estabelecer conexão</div>
+            </div>
+        </div>
+
+        <!-- Painel de Diagnóstico -->
+        <div style="flex: 1; min-width: 300px; padding: 20px; background-color: #f9f9f9;">
+            <h3 style="margin-bottom: 20px;">Diagnóstico do Problema</h3>
+            <p style="color: #e74c3c; font-weight: bold;">O sistema não pode estabelecer conexão com o banco de dados MySQL.</p>
+
+            <h4>Como configurar corretamente:</h4>
+            <div class="step-box">
+                <strong>1. Adicione a dependência do MySQL no pom.xml:</strong>
+                <div class="code-block">
+                    &lt;dependency&gt;
+                    &lt;groupId&gt;mysql&lt;/groupId&gt;
+                    &lt;groupId&gt;mysql-connector-java&lt;/groupId&gt;
+                    &lt;version&gt;8.0.33&lt;/version&gt;
+                    &lt;/dependency&gt;
+                </div>
+            </div>
+
+            <div class="step-box">
+                <strong>2. Configure a conexão no seu código Java:</strong>
+                <div class="code-block">
+                    String url = "jdbc:mysql://localhost:3306/ada_commerce_db";
+                    String user = "seu_usuario";
+                    String password = "sua_senha";
+
+                    Connection connection = DriverManager.getConnection(url, user, password);
+                </div>
+            </div>
+
+            <div class="step-box">
+                <strong>3. Verifique se o MySQL está instalado e rodando</strong>
+            </div>
+
+            <h4 style="margin-top: 20px;">Status do Sistema:</h4>
+            <div style="display: flex; flex-wrap: wrap; margin-top: 15px;">
+                <div class="status-card" style="background-color: #28a745; color: white;">
+                    <h5>JAVA/JAVAFX</h5>
+                    <p>OK</p>
+                </div>
+                <div class="status-card" style="background-color: #ffc107; color: black;">
+                    <h5>APLICAÇÃO</h5>
+                    <p>PARCIAL</p>
+                </div>
+                <div class="status-card" style="background-color: #dc3545; color: white;">
+                    <h5>BANCO DE DADOS</h5>
+                    <p>OFFLINE</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Erro: Não foi possível conectar ao banco de dados. Verifique as configurações de conexão.');
+
+        // Adiciona mais uma linha ao terminal
+        const terminal = document.querySelector('.terminal');
+        const newLine = document.createElement('div');
+        newLine.className = 'terminal-line error';
+        newLine.textContent = '[TENTATIVA] Falha na autenticação - Sem conexão com o BD';
+        terminal.appendChild(newLine);
+        terminal.scrollTop = terminal.scrollHeight;
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+/* Estilos gerais */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-background-color: white;
+}
+
+/* Estilo para botões */
+.button {
+    -fx-background-color: #336699;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #4477AA;
+}
+
+.button:pressed {
+    -fx-background-color: #224477;
+}
+
+/* Estilo para campos de texto */
+.text-field, .password-field {
+    -fx-background-color: white;
+    -fx-border-color: #CCCCCC;
+    -fx-border-radius: 3;
+    -fx-padding: 8; /* Adiciona padding interno */
+    -fx-font-size: 14px; /* Tamanho de fonte consistente */
+}
+
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #336699;
+}
+
+/* Estilo para mensagens de erro */
+.label.error {
+    -fx-text-fill: #FF0000;
+}
+
+/* CONTAINER PRINCIPAL */
+.login-container {
+    -fx-background-color: #f5f7fa;
+    -fx-padding: 20;
+}
+
+/* CAIXA DE LOGIN */
+.login-box {
+    -fx-background-color: white;
+    -fx-padding: 30 40 40 40;
+    -fx-spacing: 20; /* Espaço entre os elementos */
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);
+    -fx-max-width: 400;
+}
+
+/* TÍTULO PRINCIPAL - tamanho reduzido e com espaçamento */
+.login-title {
+    -fx-text-fill: #336699;
+    -fx-font-size: 28px; /* Tamanho reduzido */
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 5 0; /* Espaçamento inferior */
+}
+
+/* SUBTÍTULO - tamanho reduzido e com espaçamento */
+.login-subtitle {
+    -fx-text-fill: #666666;
+    -fx-font-size: 16px; /* Tamanho reduzido */
+    -fx-padding: 0 0 20 0; /* Espaçamento inferior aumentado */
+}
+
+/* LABEL DE ERRO */
+.error-label {
+    -fx-text-fill: #ff3333;
+    -fx-font-size: 14px;
+    -fx-padding: 5 0 10 0; /* Espaçamento vertical */
+    -fx-wrap-text: true;
+}
+
+/* BOTÃO PRIMÁRIO */
+.btn-primary {
+    -fx-background-color: #336699;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-padding: 10;
+    -fx-background-radius: 4;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #4477AA;
+}
+
+.btn-primary:pressed {
+    -fx-background-color: #224477;
+}
+
+/* Painel principal */
+.main-pane {
+    -fx-background-color: #f9f9f9;
+}
+
+.input-field {
+}
