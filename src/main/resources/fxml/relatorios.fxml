@@ -3,14 +3,30 @@
 <?import javafx.scene.control.*?>
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="br.com.adacommerce.controller.RelatoriosController"
-      spacing="8" style="-fx-padding:12;">
+      spacing="10" style="-fx-padding:12;">
     <children>
         <HBox spacing="8">
             <children>
-                <ComboBox fx:id="cbTipo"/>
+                <Label text="Tipo:"/>
+                <ComboBox fx:id="cbTipo" prefWidth="220"/>
+                <Label text="Início:"/>
+                <DatePicker fx:id="dpInicio"/>
+                <Label text="Fim:"/>
+                <DatePicker fx:id="dpFim"/>
+                <Label text="Valor opc:"/>
+                <TextField fx:id="tfValorOpcional" promptText="Ex: 100.00" prefWidth="90"/>
+                <Label text="Limite:"/>
+                <TextField fx:id="tfLimite" promptText="Ex: 10" prefWidth="60"/>
                 <Button text="Gerar" onAction="#onGerar"/>
+                <Button text="Exportar" fx:id="btnExportar" disable="true" onAction="#onExportar"/>
             </children>
         </HBox>
-        <TextArea fx:id="txtResultado" prefRowCount="25" wrapText="true"/>
+
+        <TextArea fx:id="txtDescricao" editable="false" prefRowCount="2" wrapText="true"
+                  style="-fx-font-size:11; -fx-opacity:0.85;"/>
+
+        <TableView fx:id="table" prefHeight="420"/>
+
+        <Label fx:id="lblStatus" text="Pronto." style="-fx-font-weight:bold;"/>
     </children>
 </VBox>

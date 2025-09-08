@@ -7,54 +7,57 @@
     <top>
         <VBox>
             <children>
-                <MenuBar>
+                <MenuBar fx:id="menuBar">
                     <menus>
                         <Menu text="Arquivo">
                             <items>
-                                <MenuItem text="Logout" onAction="#onLogout"/>
-                                <MenuItem text="Sair" onAction="#onSair"/>
+                                <MenuItem text="Logout" onAction="#menuLogout"/>
+                                <MenuItem text="Sair" onAction="#menuSair"/>
                             </items>
                         </Menu>
                         <Menu text="Relatórios">
                             <items>
-                                <MenuItem text="Relatórios" onAction="#abrirRelatorios"/>
+                                <MenuItem text="Abrir" onAction="#menuRelatorios"/>
                             </items>
                         </Menu>
                         <Menu text="Cadastros">
                             <items>
-                                <MenuItem text="Categorias" onAction="#abrirCategorias"/>
-                                <MenuItem text="Clientes" onAction="#abrirClientes"/>
-                                <MenuItem text="Produtos" onAction="#abrirProdutos"/>
+                                <MenuItem text="Categorias" onAction="#menuCategorias"/>
+                                <MenuItem text="Clientes" onAction="#menuClientes"/>
+                                <MenuItem text="Produtos" onAction="#menuProdutos"/>
                             </items>
                         </Menu>
                         <Menu text="Operações">
                             <items>
-                                <MenuItem text="Pedidos" onAction="#abrirPedidos"/>
+                                <MenuItem text="Pedidos" onAction="#menuPedidos"/>
                             </items>
                         </Menu>
+                        <!-- Remova este Menu inteiro se não quiser “Sistema” -->
                         <Menu text="Sistema">
                             <items>
-                                <MenuItem text="Configurações" onAction="#abrirConfig"/>
+                                <MenuItem text="Configurações" onAction="#menuConfiguracoes"/>
                             </items>
                         </Menu>
                     </menus>
                 </MenuBar>
                 <ToolBar>
                     <items>
-                        <Label fx:id="lblTitulo" text="Relatórios" style="-fx-font-size:16; -fx-font-weight: bold;"/>
+                        <Label fx:id="lblTitulo" text=""/>
                         <Region/>
-                        <Label fx:id="lblUsuario" text="Usuário:"/>
+                        <Label fx:id="lblUsuarioLogado" text="Usuário:"/>
                     </items>
                 </ToolBar>
             </children>
         </VBox>
     </top>
     <center>
-        <StackPane fx:id="contentArea"/>
+        <StackPane fx:id="contentRoot"/>
     </center>
     <bottom>
         <HBox style="-fx-padding:6; -fx-background-color:#ececec;">
-            <children><Label fx:id="lblStatus" text="Pronto."/></children>
+            <children>
+                <Label fx:id="lblStatus" text="Pronto."/>
+            </children>
         </HBox>
     </bottom>
 </BorderPane>

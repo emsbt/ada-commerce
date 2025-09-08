@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
-
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="br.com.adacommerce.controller.CategoriasController">
-
     <left>
         <VBox spacing="8" prefWidth="320" style="-fx-padding:12;">
             <children>
@@ -25,7 +23,6 @@
             </children>
         </VBox>
     </left>
-
     <center>
         <VBox spacing="6" style="-fx-padding:10;">
             <children>

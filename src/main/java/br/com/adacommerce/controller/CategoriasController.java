@@ -9,8 +9,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-import java.sql.SQLException;
-
 public class CategoriasController {
 
     @FXML private TextField txtNome;
@@ -70,14 +68,14 @@ public class CategoriasController {
                 nova.setAtivo(chkAtivo.isSelected());
                 nova.setCategoriaPai(cbCategoriaPai.getValue());
                 dao.inserir(nova);
-                lblMensagem.setText("Categoria criada (ID " + nova.getId() + ").");
+                lblMensagem.setText("Criada ID " + nova.getId());
             } else {
                 emEdicao.setNome(txtNome.getText());
                 emEdicao.setDescricao(txtDescricao.getText());
                 emEdicao.setAtivo(chkAtivo.isSelected());
                 emEdicao.setCategoriaPai(cbCategoriaPai.getValue());
                 dao.atualizar(emEdicao);
-                lblMensagem.setText("Categoria atualizada.");
+                lblMensagem.setText("Atualizada");
             }
             limpar();
             recarregar();
@@ -87,9 +85,43 @@ public class CategoriasController {
         }
     }
 
+    @FXML private void onLimpar() { limpar(); }
+
     @FXML
-    private void onLimpar() {
-        limpar();
+    private void onExcluir() {
+        Categoria sel = tblCategorias.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            lblMensagem.setText("Selecione uma categoria.");
+            return;
+        }
+        try {
+            if (!dao.podeExcluir(sel.getId())) {
+                lblMensagem.setText("Há subcategorias. Remova vínculo antes.");
+                return;
+            }
+            dao.excluir(sel.getId());
+            lblMensagem.setText("Excluída.");
+            recarregar();
+            limpar();
+        } catch (Exception e) {
+            e.printStackTrace();
+            lblMensagem.setText("Erro: " + e.getMessage());
+        }
+    }
+
+    private void editar(Categoria c) {
+        emEdicao = c;
+        txtNome.setText(c.getNome());
+        txtDescricao.setText(c.getDescricao());
+        chkAtivo.setSelected(c.isAtivo());
+        if (c.getCategoriaPai() != null) {
+            cbCategoriaPai.getSelectionModel().select(
+                    dados.stream()
+                            .filter(x -> x.getId().equals(c.getCategoriaPai().getId()))
+                            .findFirst().orElse(null));
+        } else {
+            cbCategoriaPai.getSelectionModel().clearSelection();
+        }
     }
 
     private void limpar() {
@@ -100,40 +132,5 @@ public class CategoriasController {
         tblCategorias.getSelectionModel().clearSelection();
         emEdicao = null;
         lblMensagem.setText("");
-    }
-
-    private void editar(Categoria c) {
-        emEdicao = c;
-        txtNome.setText(c.getNome());
-        txtDescricao.setText(c.getDescricao());
-        chkAtivo.setSelected(c.isAtivo());
-        if (c.getCategoriaPai() != null) {
-            cbCategoriaPai.getSelectionModel().select(
-                    dados.stream().filter(x -> x.getId().equals(c.getCategoriaPai().getId())).findFirst().orElse(null));
-        } else {
-            cbCategoriaPai.getSelectionModel().clearSelection();
-        }
-    }
-
-    @FXML
-    private void onExcluir() {
-        Categoria sel = tblCategorias.getSelectionModel().getSelectedItem();
-        if (sel == null) {
-            lblMensagem.setText("Selecione uma categoria para excluir.");
-            return;
-        }
-        try {
-            if (!dao.podeExcluir(sel.getId())) {
-                lblMensagem.setText("Não é possível excluir: existem subcategorias.");
-                return;
-            }
-            dao.excluir(sel.getId());
-            lblMensagem.setText("Excluída.");
-            recarregar();
-            limpar();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            lblMensagem.setText("Erro excluindo: " + e.getMessage());
-        }
     }
 }
