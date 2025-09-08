@@ -4,6 +4,7 @@ import br.com.adacommerce.config.DatabaseConfig;
 import br.com.adacommerce.model.*;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -60,8 +61,19 @@ public class PedidoService {
             c.setId(cliId);
             p.setCliente(c);
         }
-        Timestamp ts = rs.getTimestamp("data_criacao");
-        if (ts != null) p.setDataPedido(new Date(ts.getTime()));
+        // Correção: aceita tanto TIMESTAMP quanto TEXT
+        try {
+            Timestamp ts = rs.getTimestamp("data_criacao");
+            if (ts != null) {
+                p.setDataPedido(new Date(ts.getTime()));
+            } else {
+                String txt = rs.getString("data_criacao");
+                if (txt != null) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    p.setDataPedido(sdf.parse(txt));
+                }
+            }
+        } catch (Exception ignore) {}
         String statusStr = rs.getString("status_pedido");
         if (statusStr != null) {
             try { p.setStatus(PedidoStatus.valueOf(statusStr)); } catch (IllegalArgumentException ignore) {}
@@ -83,7 +95,9 @@ public class PedidoService {
                 ps.setInt(1, p.getCliente().getId());
             else
                 ps.setNull(1, Types.INTEGER);
-            ps.setTimestamp(2, new Timestamp(p.getDataPedido().getTime()));
+            // Salva data como texto formatado
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            ps.setString(2, sdf.format(p.getDataPedido()));
             ps.setString(3, p.getStatus().name());
             ps.setString(4, "PENDENTE");
             ps.executeUpdate();

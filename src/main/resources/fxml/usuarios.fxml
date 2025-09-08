@@ -8,6 +8,7 @@
         <TextField fx:id="txtUsuario" promptText="Usuário"/>
         <PasswordField fx:id="txtSenha" promptText="Senha"/>
         <Button text="Salvar" fx:id="btnSalvar" onAction="#onSalvar"/>
+        <Button text="Editar" fx:id="btnEditar" onAction="#onEditar"/>
     </HBox>
     <TableView fx:id="tableUsuarios" prefHeight="250">
         <columns>

@@ -1,5 +1,6 @@
 package br.com.adacommerce.controller;
 
+import br.com.adacommerce.report.CsvExporter;
 import br.com.adacommerce.report.ReportRow;
 import br.com.adacommerce.report.ReportService;
 import br.com.adacommerce.report.ReportType;
@@ -8,7 +9,9 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.FileChooser;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,10 +86,25 @@ public class RelatoriosController {
     }
 
     @FXML
-    public void onExportar() {
-        // Implementar exportação se desejar
-        lblStatus.setText("Exportação não implementada.");
+    private void onExportar() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Exportar relatório");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
+        File file = fileChooser.showSaveDialog(table.getScene().getWindow());
+        if (file == null) return;
+
+        try {
+            CsvExporter.export(lastRows, file);
+            Alert ok = new Alert(Alert.AlertType.INFORMATION, "Relatório exportado com sucesso!", ButtonType.OK);
+            ok.setHeaderText("Exportação");
+            ok.showAndWait();
+        } catch (Exception ex) {
+            Alert error = new Alert(Alert.AlertType.ERROR, "Erro ao exportar: " + ex.getMessage(), ButtonType.OK);
+            error.setHeaderText("Exportação");
+            error.showAndWait();
+        }
     }
+
 
     private Double parseDouble(String s){ if(s==null||s.isBlank()) return null; try{return Double.valueOf(s.replace(",","."));}catch(Exception e){return null;} }
     private Integer parseInt(String s){ if(s==null||s.isBlank()) return null; try{return Integer.valueOf(s);}catch(Exception e){return null;} }
