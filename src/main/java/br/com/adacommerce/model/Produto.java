@@ -6,7 +6,7 @@ public class Produto {
     private Integer id;
     private String nome;
     private String descricao;
-    private Categoria categoria;
+    private Categoria categoria; // <-- garantir este campo
     private double preco;
     private int estoqueAtual;
     private boolean ativo = true;
@@ -31,5 +31,7 @@ public class Produto {
     public void setDataCriacao(Date dataCriacao) { this.dataCriacao = dataCriacao; }
     public Date getDataAtualizacao() { return dataAtualizacao; }
     public void setDataAtualizacao(Date dataAtualizacao) { this.dataAtualizacao = dataAtualizacao; }
-    @Override public String toString() { return nome; }
+
+    @Override
+    public String toString() { return nome; }
 }

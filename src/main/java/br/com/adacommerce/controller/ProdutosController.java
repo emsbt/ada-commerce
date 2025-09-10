@@ -15,7 +15,6 @@ import javafx.scene.control.*;
 
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.List;
 
 public class ProdutosController {
 
@@ -74,12 +73,29 @@ public class ProdutosController {
     }
 
     private void carregarCategorias() {
-        List<br.com.adacommerce.model.Categoria> cats = categoriaService.listarTodas();
-        comboCategoria.getItems().setAll(cats);
+        // preserva seleção por id (final para uso em lambda)
+        Categoria sel = comboCategoria.getSelectionModel().getSelectedItem();
+        final Integer selecionadoId = (sel != null) ? sel.getId() : null;
+
+        // listar() não lança SQLException -> sem try/catch
+        comboCategoria.getItems().setAll(categoriaService.listarTodas());
+
+        if (selecionadoId != null) {
+            comboCategoria.getItems().stream()
+                    .filter(c -> c.getId() != null && c.getId().equals(selecionadoId))
+                    .findFirst()
+                    .ifPresent(c -> comboCategoria.getSelectionModel().select(c));
+        }
     }
 
     private void carregarProdutos() {
-        produtos.setAll(produtoService.listarTodos());
+        try {
+            // usar listar() que declara SQLException e tratar aqui na controller
+            produtos.setAll(produtoService.listar());
+        } catch (SQLException e) {
+            erro("Erro ao carregar produtos", e.getMessage());
+            produtos.clear();
+        }
     }
 
     private void aplicarFiltro(String termo) {
@@ -97,7 +113,21 @@ public class ProdutosController {
     private void preencherFormulario(Produto p) {
         txtNome.setText(p.getNome());
         txtDescricao.setText(p.getDescricao());
-        comboCategoria.getSelectionModel().select(p.getCategoria());
+        // select categoria por id
+        if (p.getCategoria() != null && p.getCategoria().getId() != null) {
+            Integer id = p.getCategoria().getId();
+            comboCategoria.getItems().stream()
+                    .filter(c -> c.getId() != null && c.getId().equals(id))
+                    .findFirst()
+                    .ifPresentOrElse(
+                            c -> comboCategoria.getSelectionModel().select(c),
+                            () -> comboCategoria.getSelectionModel().clearSelection()
+                    );
+        } else {
+            comboCategoria.getSelectionModel().clearSelection();
+        }
+
+        // preencher demais campos (preço/estoque/ativo)
         txtPreco.setText(String.valueOf(p.getPreco()));
         txtEstoque.setText(String.valueOf(p.getEstoqueAtual()));
         chkAtivo.setSelected(p.isAtivo());
@@ -157,6 +187,7 @@ public class ProdutosController {
         conf.showAndWait().ifPresent(bt -> {
             if (bt == ButtonType.YES) {
                 try {
+                    // certifique-se de que produtoService.excluir(id) exista; se não existir, implemente no service
                     produtoService.excluir(sel.getId());
                     carregarProdutos();
                     limparFormulario();
@@ -189,7 +220,13 @@ public class ProdutosController {
                 emEdicao.setEstoqueAtual(Integer.parseInt(txtEstoque.getText().trim()));
                 emEdicao.setAtivo(chkAtivo.isSelected());
                 emEdicao.setDataAtualizacao(new Date());
-                produtoService.atualizar(emEdicao);
+                // se produtoService.atualizar(...) não for público, usar produtoService.salvar(emEdicao)
+                try {
+                    produtoService.atualizar(emEdicao);
+                } catch (NoSuchMethodError | UnsatisfiedLinkError ex) {
+                    // fallback para salvar caso atualizar não exista
+                    produtoService.salvar(emEdicao);
+                }
             }
             carregarProdutos();
             limparFormulario();

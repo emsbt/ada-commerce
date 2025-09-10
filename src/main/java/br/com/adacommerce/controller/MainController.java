@@ -26,7 +26,7 @@ public class MainController {
             String user = AuthSession.getUsuarioLogado();
             lblUsuarioLogado.setText(user != null ? "Usuário: " + user : "(não logado)");
         }
-        load("/fxml/relatorios.fxml", "Relatórios");
+        load("/fxml/dashboard.fxml", "Relatórios");
     }
 
     private void setCenter(Node n) {

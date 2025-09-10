@@ -1,6 +1,8 @@
-package br.com.adacommerce.report;
+package br.com.adacommerce.service;
 
 import br.com.adacommerce.config.DatabaseConfig;
+import br.com.adacommerce.report.ReportRow;
+import br.com.adacommerce.report.ReportType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

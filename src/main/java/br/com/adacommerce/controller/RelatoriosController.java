@@ -2,7 +2,7 @@ package br.com.adacommerce.controller;
 
 import br.com.adacommerce.report.CsvExporter;
 import br.com.adacommerce.report.ReportRow;
-import br.com.adacommerce.report.ReportService;
+import br.com.adacommerce.service.ReportService;
 import br.com.adacommerce.report.ReportType;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

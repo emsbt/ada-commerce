@@ -62,7 +62,7 @@ public class PedidosController {
     private Modo modo = Modo.VISUAL;
 
     @FXML
-    public void initialize() {
+    public void initialize() throws SQLException {
         configurarColunas();
         tablePedidos.setItems(pedidos);
         tableItens.setItems(itens);
@@ -126,8 +126,8 @@ public class PedidosController {
         comboCliente.getItems().setAll(clienteService.listarTodos());
     }
 
-    private void carregarProdutos() {
-        cbProduto.getItems().setAll(produtoService.listarTodos());
+    private void carregarProdutos() throws SQLException {
+        cbProduto.getItems().setAll(produtoService.listar());
     }
 
     private void carregarPedidos() {

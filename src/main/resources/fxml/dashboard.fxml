@@ -5,18 +5,49 @@
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
+      fx:controller="br.com.adacommerce.controller.DashBoardController"
       spacing="12">
     <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
 
     <Label text="Dashboard" style="-fx-font-size:20; -fx-font-weight:bold;"/>
-    <Label text="Selecione um módulo no menu superior para começar." style="-fx-font-size:14;"/>
+    <Label text="Resumo de pedidos por status" style="-fx-font-size:14;"/>
+
     <Separator/>
-    <HBox spacing="20">
-        <VBox spacing="4">
-            <Label text="Resumo (exemplo)" style="-fx-font-weight:bold;"/>
-            <Label text="Pedidos hoje: 0"/>
-            <Label text="Vendas mês: 0,00"/>
-            <Label text="Clientes ativos: 0"/>
-        </VBox>
+
+    <GridPane hgap="12" vgap="8">
+        <columnConstraints>
+            <ColumnConstraints minWidth="220"/>
+            <ColumnConstraints minWidth="80"/>
+        </columnConstraints>
+
+        <Label text="Rascunho:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <Label fx:id="lblRascunhoCount" text="0" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Aberto:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <Label fx:id="lblAbertoCount" text="0" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <Label text="Confirmado:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <Label fx:id="lblConfirmadoCount" text="0" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <Label text="Aguardando Pagamento:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <Label fx:id="lblAguardandoPagamentoCount" text="0" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+        <Label text="Pago:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <Label fx:id="lblPagoCount" text="0" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+        <Label text="Cancelado:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <Label fx:id="lblCanceladoCount" text="0" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+        <Label text="Finalizado:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+        <Label fx:id="lblFinalizadoCount" text="0" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+        <Label text="Total pedidos:" style="-fx-font-weight:bold;" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+        <Label fx:id="lblTotal" text="0" style="-fx-font-weight:bold;" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <HBox spacing="8">
+        <Button text="Atualizar" onAction="#onRefresh"/>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <Label text="Dica: clique em um módulo no menu para navegar."/>
     </HBox>
 </VBox>
