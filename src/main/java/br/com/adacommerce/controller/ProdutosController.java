@@ -113,7 +113,7 @@ public class ProdutosController {
     }
 
     private void aplicarModo(Modo m) {
-        modo = m;
+        this.modo = m;
         boolean ed = (m != Modo.VISUAL);
         txtNome.setDisable(!ed);
         txtDescricao.setDisable(!ed);

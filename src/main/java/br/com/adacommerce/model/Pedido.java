@@ -15,6 +15,7 @@ public class Pedido {
     private PedidoStatus status = PedidoStatus.RASCUNHO;
     private final List<ItemPedido> itens = new ArrayList<>();
 
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 
@@ -33,8 +34,8 @@ public class Pedido {
     public double getTotalBruto() { return totalBruto; }
     public double getTotalLiquido() { return totalLiquido; }
 
-    public PedidoStatus getStatus() { return status; }
-    public void setStatus(PedidoStatus status) { this.status = status; }
+    public PedidoStatus  getStatus() { return status; }
+    public void setStatus(PedidoStatus  status) { this.status = status; }
 
     public List<ItemPedido> getItens() { return itens; }
 

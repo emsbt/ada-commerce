@@ -140,6 +140,12 @@ public class ClientesController {
 
     @FXML
     private void onSalvar() {
+        if (txtDocumento.getText() == null || txtDocumento.getText().isBlank()) {
+            Alert a = new Alert(Alert.AlertType.ERROR, "Documento obrigatório!", ButtonType.OK);
+            a.showAndWait();
+            return;
+        }
+
         try {
             if (!validar()) return;
 

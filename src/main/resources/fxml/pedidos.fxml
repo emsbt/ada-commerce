@@ -24,6 +24,10 @@
                 <Button text="Salvar Rascunho" fx:id="btnSalvar" onAction="#onSalvar" disable="true"/>
                 <Button text="Confirmar" fx:id="btnConfirmar" onAction="#onConfirmar" disable="true"/>
                 <Button text="Cancelar" fx:id="btnCancelar" onAction="#onCancelar" disable="true"/>
+                <Button text="Abrir" fx:id="btnAbrir" onAction="#onAbrir" disable="true"/>
+                <Button text="Finalizar" fx:id="btnFinalizar" onAction="#onFinalizar" disable="true"/>
+                <Button text="Aguardar Pagamento" fx:id="btnAguardarPagamento" onAction="#onAguardarPagar" disable="true"/>
+                <Button text="Pagar" fx:id="btnPagar" onAction="#onPagar" disable="true"/>
             </HBox>
 
             <SplitPane dividerPositions="0.55">

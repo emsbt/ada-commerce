@@ -44,6 +44,10 @@ public class PedidosController {
     @FXML private Button btnRemItem;
     @FXML private Label lblModo;
     @FXML private Label lblTotais;
+    @FXML private Button btnAbrir;
+    @FXML private Button btnAguardarPagamento;
+    @FXML private Button btnPagar;
+    @FXML private Button btnFinalizar;
 
     private final PedidoService pedidoService = new PedidoService();
     private final ClienteService clienteService = new ClienteService();
@@ -170,7 +174,11 @@ public class PedidosController {
         btnCancelar.setDisable(!ed);
         btnAddItem.setDisable(!ed);
         btnRemItem.setDisable(!ed);
-        btnConfirmar.setDisable(true);
+        btnConfirmar.setDisable(!ed);
+        btnAbrir.setDisable(!ed);
+        btnAguardarPagamento.setDisable(!ed);
+        btnPagar.setDisable(!ed);
+        btnFinalizar.setDisable(true);
         lblModo.setText("Modo: " + (m==Modo.VISUAL? "visualização": (m==Modo.NOVO? "novo":"edição")));
     }
 
@@ -214,6 +222,57 @@ public class PedidosController {
         if (sel == null) { erro("Info","Selecione um pedido"); return; }
         try {
             pedidoService.confirmarPedido(sel);
+            tablePedidos.refresh();
+            atualizarTotais(sel);
+            habilitarConfirmar(sel);
+        } catch (SQLException e) {
+            erro("Erro","Falha ao confirmar: " + e.getMessage());
+        }
+    }
+
+    @FXML private void onAbrir() {
+        Pedido sel = tablePedidos.getSelectionModel().getSelectedItem();
+        if (sel == null) { erro("Info","Selecione um pedido"); return; }
+        try {
+            pedidoService.abrirPedido(sel);
+            tablePedidos.refresh();
+            atualizarTotais(sel);
+            habilitarConfirmar(sel);
+        } catch (SQLException e) {
+            erro("Erro","Falha ao confirmar: " + e.getMessage());
+        }
+    }
+
+    @FXML private void onAguardarPagar() {
+        Pedido sel = tablePedidos.getSelectionModel().getSelectedItem();
+        if (sel == null) { erro("Info","Selecione um pedido"); return; }
+        try {
+            pedidoService.aguardarPagamento(sel);
+            tablePedidos.refresh();
+            atualizarTotais(sel);
+            habilitarConfirmar(sel);
+        } catch (SQLException e) {
+            erro("Erro","Falha ao confirmar: " + e.getMessage());
+        }
+    }
+
+    @FXML private void onPagar() {
+        Pedido sel = tablePedidos.getSelectionModel().getSelectedItem();
+        if (sel == null) { erro("Info","Selecione um pedido"); return; }
+        try {
+            pedidoService.pagarPedido(sel);
+            tablePedidos.refresh();
+            atualizarTotais(sel);
+            habilitarConfirmar(sel);
+        } catch (SQLException e) {
+            erro("Erro","Falha ao confirmar: " + e.getMessage());
+        }
+    }
+    @FXML private void onFinalizar() {
+        Pedido sel = tablePedidos.getSelectionModel().getSelectedItem();
+        if (sel == null) { erro("Info","Selecione um pedido"); return; }
+        try {
+            pedidoService.finalizarPedido(sel);
             tablePedidos.refresh();
             atualizarTotais(sel);
             habilitarConfirmar(sel);

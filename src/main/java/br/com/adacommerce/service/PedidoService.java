@@ -42,6 +42,27 @@ public class PedidoService {
         p.setStatus(PedidoStatus.CONFIRMADO);
         atualizarStatus(p);
     }
+    public void abrirPedido(Pedido p) throws SQLException {
+        if (p.getId() == null) throw new SQLException("Pedido não salvo.");
+        p.setStatus(PedidoStatus.ABERTO);
+        atualizarStatus(p);
+    }
+    public void aguardarPagamento(Pedido p) throws SQLException {
+        if (p.getId() == null) throw new SQLException("Pedido não salvo.");
+        p.setStatus(PedidoStatus.AGUARDANDO_PAGAMENTO);
+        atualizarStatus(p);
+    }
+
+    public void pagarPedido(Pedido p) throws SQLException {
+        if (p.getId() == null) throw new SQLException("Pedido não salvo.");
+        p.setStatus(PedidoStatus.PAGO);
+        atualizarStatus(p);
+    }
+    public void finalizarPedido(Pedido p) throws SQLException {
+        if (p.getId() == null) throw new SQLException("Pedido não salvo.");
+        p.setStatus(PedidoStatus.FINALIZADO);
+        atualizarStatus(p);
+    }
 
     public void cancelarPedido(Pedido p) throws SQLException {
         if (p.getId() == null) throw new SQLException("Pedido não salvo.");
