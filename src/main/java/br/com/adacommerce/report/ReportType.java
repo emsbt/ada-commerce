@@ -10,7 +10,7 @@ public enum ReportType {
 
     public String getDescricao() {
         return switch (this) {
-            case FATURAMENTO_POR_DIA -> "Faturamento somado por dia (pedidos confirmados).";
+            case FATURAMENTO_POR_DIA -> "Faturamento somado por dia (pagos).";
             case PEDIDOS_POR_STATUS -> "Contagem de pedidos agrupados por status.";
             case PRODUTOS_MAIS_VENDIDOS -> "Lista de produtos mais vendidos no período.";
             case RANKING_CLIENTES -> "Clientes ordenados pelo total comprado.";

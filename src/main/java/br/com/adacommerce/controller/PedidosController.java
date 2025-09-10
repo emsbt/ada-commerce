@@ -48,6 +48,7 @@ public class PedidosController {
     @FXML private Button btnAguardarPagamento;
     @FXML private Button btnPagar;
     @FXML private Button btnFinalizar;
+    @FXML private Button btnEditar;
 
     private final PedidoService pedidoService = new PedidoService();
     private final ClienteService clienteService = new ClienteService();
@@ -72,9 +73,11 @@ public class PedidosController {
 
         tablePedidos.getSelectionModel().selectedItemProperty()
                 .addListener((o,a,sel)-> {
-                    if (sel != null && modo == Modo.VISUAL) {
+                    if (sel != null) {
                         emEdicao = sel;
                         preencher(sel);
+                        // atualizar botões conforme status do pedido selecionado
+                        atualizarAcoesPorStatus(sel);
                         habilitarConfirmar(sel);
                     }
                 });
@@ -178,19 +181,82 @@ public class PedidosController {
         btnAbrir.setDisable(!ed);
         btnAguardarPagamento.setDisable(!ed);
         btnPagar.setDisable(!ed);
+        // finalização só é habilitada via atualizarAcoesPorStatus quando em modo VISUAL
         btnFinalizar.setDisable(true);
         lblModo.setText("Modo: " + (m==Modo.VISUAL? "visualização": (m==Modo.NOVO? "novo":"edição")));
+
+        if (m == Modo.VISUAL) {
+            // ajustar botões conforme o pedido selecionado
+            atualizarAcoesPorStatus(emEdicao);
+        }
     }
 
     private void habilitarConfirmar(Pedido p) {
         btnConfirmar.setDisable(!(p != null && p.getStatus()!=null && p.getStatus().isRascunho()));
     }
 
+    /**
+     * Atualiza habilitação dos botões de ação com base no status do pedido selecionado.
+     * Regras aplicadas:
+     *  - Cancelar permitido apenas quando ABERTO, CONFIRMADO ou AGUARDANDO_PAGAMENTO
+     *  - Não permitir editar/abrir/cancelar se pedido estiver CANCELADO, PAGO ou FINALIZADO
+     *  - Finalizar habilitado apenas quando PAGO
+     *  - Pagar habilitado apenas quando AGUARDANDO_PAGAMENTO
+     *  - Abrir habilitado apenas quando RASCUNHO ou CONFIRMADO
+     *  - Aguardar pagamento habilitado quando ABERTO ou CONFIRMADO
+     */
+    private void atualizarAcoesPorStatus(Pedido p) {
+        // default: desabilitar tudo (quando não há pedido selecionado)
+        if (p == null || p.getStatus() == null) {
+            btnConfirmar.setDisable(true);
+            btnAbrir.setDisable(true);
+            btnAguardarPagamento.setDisable(true);
+            btnPagar.setDisable(true);
+            btnFinalizar.setDisable(true);
+            btnCancelar.setDisable(true);
+
+            // permitir criar novo sempre
+            return;
+        }
+
+        PedidoStatus s = p.getStatus();
+
+        boolean isCancelado = s == PedidoStatus.CANCELADO;
+        boolean isPago = s == PedidoStatus.PAGO;
+        boolean isFinalizado = s == PedidoStatus.FINALIZADO;
+
+        // Confirmar (só rascunho)
+        btnConfirmar.setDisable(!(s.isRascunho()));
+
+        // Abrir: só de RASCUNHO ou CONFIRMADO (e nunca se cancelado/pago/finalizado)
+        btnAbrir.setDisable(!( (s.isRascunho() || s.isConfirmado()) && !isCancelado && !isPago && !isFinalizado ));
+
+        // Aguardar pagamento: permitir quando ABERTO ou CONFIRMADO (e não cancelado/pago/finalizado)
+        btnAguardarPagamento.setDisable(!( (s.isAberto() || s.isConfirmado()) && !isCancelado && !isPago && !isFinalizado ));
+
+        // Pagar: apenas quando aguardando pagamento
+        btnPagar.setDisable(!(s.isAguardandoPagamento()));
+
+        // Finalizar: apenas quando pago
+        btnFinalizar.setDisable(!(s.isPago()));
+        btnEditar.setDisable(s.isPago()|| s.isCancelado()|| s.isFinalizado());
+
+        // Cancelar: apenas quando ABERTO, CONFIRMADO ou AGUARDANDO_PAGAMENTO
+        btnCancelar.setDisable(!(s.isAberto() || s.isConfirmado() || s.isAguardandoPagamento()));
+
+        // Itens/edit: só permitidos se não estiver em CANCELADO / PAGO / FINALIZADO
+        boolean podeEditar = !isCancelado && !isPago && !isFinalizado;
+        btnAddItem.setDisable(!podeEditar);
+        btnRemItem.setDisable(!podeEditar);
+        btnSalvar.setDisable(!podeEditar);
+    }
+
     @FXML private void onNovo() {
         emEdicao = new Pedido();
         emEdicao.setNumero("P" + System.currentTimeMillis());
         emEdicao.setDataPedido(new Date());
-        emEdicao.setStatus(PedidoStatus.RASCUNHO);
+        // iniciar como ABERTO para permitir adicionar itens imediatamente
+        emEdicao.setStatus(PedidoStatus.ABERTO);
         limpar();
         txtNumero.setText(emEdicao.getNumero());
         aplicarModo(Modo.NOVO);
@@ -199,19 +265,31 @@ public class PedidosController {
     @FXML private void onSalvar() {
         if (emEdicao == null) return;
         if (comboCliente.getValue() == null) { erro("Validação","Selecione um cliente"); return; }
+        // bloquear salvar se pedido estiver em estados imutáveis
+        if (emEdicao.getStatus() != null &&
+                (emEdicao.getStatus().isCancelado() || emEdicao.getStatus().isPago() || emEdicao.getStatus().isFinalizado())) {
+            erro("Ação não permitida", "Não é possível salvar/editar um pedido que está cancelado, pago ou finalizado.");
+            return;
+        }
         try {
             emEdicao.setCliente(comboCliente.getValue());
             double desconto = parse(txtDesconto.getText());
             emEdicao.setDesconto(desconto);
+
+            // atualiza itens e totais antes de salvar (evita mostrar 0/0)
             emEdicao.getItens().clear();
             emEdicao.getItens().addAll(itens);
             emEdicao.recalcularTotais();
+
             pedidoService.salvarRascunho(emEdicao);
+
             if (!pedidos.contains(emEdicao)) pedidos.add(0, emEdicao);
             aplicarModo(Modo.VISUAL);
             tablePedidos.refresh();
             habilitarConfirmar(emEdicao);
             atualizarTotais(emEdicao);
+            // atualizar botoes conforme novo status salvo
+            atualizarAcoesPorStatus(emEdicao);
         } catch (SQLException e) {
             erro("Erro","Falha ao salvar: " + e.getMessage());
         }
@@ -220,11 +298,17 @@ public class PedidosController {
     @FXML private void onConfirmar() {
         Pedido sel = tablePedidos.getSelectionModel().getSelectedItem();
         if (sel == null) { erro("Info","Selecione um pedido"); return; }
+        // bloquear confirmar se cancelado/pago/finalizado
+        if (sel.getStatus()!=null && (sel.getStatus().isCancelado() || sel.getStatus().isPago() || sel.getStatus().isFinalizado())) {
+            erro("Ação não permitida", "Não é possível confirmar um pedido cancelado, pago ou finalizado.");
+            return;
+        }
         try {
             pedidoService.confirmarPedido(sel);
             tablePedidos.refresh();
             atualizarTotais(sel);
             habilitarConfirmar(sel);
+            atualizarAcoesPorStatus(sel);
         } catch (SQLException e) {
             erro("Erro","Falha ao confirmar: " + e.getMessage());
         }
@@ -233,78 +317,149 @@ public class PedidosController {
     @FXML private void onAbrir() {
         Pedido sel = tablePedidos.getSelectionModel().getSelectedItem();
         if (sel == null) { erro("Info","Selecione um pedido"); return; }
+        // não permitir abrir se estiver cancelado, pago ou finalizado
+        if (sel.getStatus()!=null && (sel.getStatus().isCancelado() || sel.getStatus().isPago() || sel.getStatus().isFinalizado())) {
+            erro("Ação não permitida", "Não é possível abrir um pedido que está cancelado, pago ou finalizado.");
+            return;
+        }
         try {
             pedidoService.abrirPedido(sel);
             tablePedidos.refresh();
             atualizarTotais(sel);
             habilitarConfirmar(sel);
+            atualizarAcoesPorStatus(sel);
         } catch (SQLException e) {
-            erro("Erro","Falha ao confirmar: " + e.getMessage());
+            erro("Erro","Falha ao abrir: " + e.getMessage());
         }
     }
 
     @FXML private void onAguardarPagar() {
         Pedido sel = tablePedidos.getSelectionModel().getSelectedItem();
         if (sel == null) { erro("Info","Selecione um pedido"); return; }
+        if (sel.getStatus()!=null && (sel.getStatus().isCancelado() || sel.getStatus().isPago() || sel.getStatus().isFinalizado())) {
+            erro("Ação não permitida", "Não é possível marcar para aguardar pagamento um pedido cancelado, pago ou finalizado.");
+            return;
+        }
         try {
             pedidoService.aguardarPagamento(sel);
             tablePedidos.refresh();
             atualizarTotais(sel);
             habilitarConfirmar(sel);
+            atualizarAcoesPorStatus(sel);
         } catch (SQLException e) {
-            erro("Erro","Falha ao confirmar: " + e.getMessage());
+            erro("Erro","Falha ao marcar aguardando pagamento: " + e.getMessage());
         }
     }
 
     @FXML private void onPagar() {
         Pedido sel = tablePedidos.getSelectionModel().getSelectedItem();
         if (sel == null) { erro("Info","Selecione um pedido"); return; }
+        if (sel.getStatus()!=null && sel.getStatus().isCancelado()) {
+            erro("Ação não permitida", "Não é possível pagar um pedido cancelado.");
+            return;
+        }
         try {
             pedidoService.pagarPedido(sel);
             tablePedidos.refresh();
             atualizarTotais(sel);
             habilitarConfirmar(sel);
+            atualizarAcoesPorStatus(sel);
         } catch (SQLException e) {
-            erro("Erro","Falha ao confirmar: " + e.getMessage());
+            erro("Erro","Falha ao processar pagamento: " + e.getMessage());
         }
     }
     @FXML private void onFinalizar() {
         Pedido sel = tablePedidos.getSelectionModel().getSelectedItem();
         if (sel == null) { erro("Info","Selecione um pedido"); return; }
+        // não permitir finalizar se cancelado
+        if (sel.getStatus()!=null && sel.getStatus().isCancelado()) {
+            erro("Ação não permitida", "Não é possível finalizar um pedido cancelado.");
+            return;
+        }
         try {
             pedidoService.finalizarPedido(sel);
             tablePedidos.refresh();
             atualizarTotais(sel);
             habilitarConfirmar(sel);
+            atualizarAcoesPorStatus(sel);
         } catch (SQLException e) {
-            erro("Erro","Falha ao confirmar: " + e.getMessage());
+            erro("Erro","Falha ao finalizar: " + e.getMessage());
         }
     }
 
     @FXML private void onCancelar() {
-        if (modo != Modo.VISUAL) {
-            aplicarModo(Modo.VISUAL);
-            if (emEdicao != null && emEdicao.getId()==null) pedidos.remove(emEdicao);
-            emEdicao = null;
+        // se não há pedido em edição, só limpa a tela (descartar edição)
+        if (emEdicao == null) {
             limpar();
+            aplicarModo(Modo.VISUAL);
             return;
         }
-        Pedido sel = tablePedidos.getSelectionModel().getSelectedItem();
-        if (sel == null) return;
-        try {
-            pedidoService.cancelarPedido(sel);
-            tablePedidos.refresh();
-            atualizarTotais(sel);
-            habilitarConfirmar(sel);
-        } catch (SQLException e) {
-            erro("Erro","Falha ao cancelar: " + e.getMessage());
+
+        // Se pedido foi salvo (tem id) perguntar se quer cancelar no banco
+        if (emEdicao.getId() != null) {
+            // Permitir cancelamento só em ABERTO, CONFIRMADO ou AGUARDANDO_PAGAMENTO
+            PedidoStatus s = emEdicao.getStatus();
+            if (!(s != null && (s.isAberto() || s.isConfirmado() || s.isAguardandoPagamento()))) {
+                erro("Ação não permitida", "Só é possível cancelar pedidos que estejam ABERTO, CONFIRMADO ou AGUARDANDO_PAGAMENTO.");
+                return;
+            }
+
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                    "Deseja cancelar (marcar como CANCELADO) este pedido? Esta ação é registrada.",
+                    ButtonType.YES, ButtonType.NO);
+            confirm.setHeaderText("Cancelar pedido");
+            Optional<ButtonType> resp = confirm.showAndWait();
+            if (resp.isPresent() && resp.get() == ButtonType.YES) {
+                try {
+                    pedidoService.cancelarPedido(emEdicao);
+                    // só limpar/atualizar UI depois que o cancelamento no DB ocorrer com sucesso
+                    carregarPedidos();
+                    limpar();
+                    aplicarModo(Modo.VISUAL);
+                    tablePedidos.refresh();
+                    return;
+                } catch (SQLException e) {
+                    erro("Erro","Falha ao cancelar pedido: " + e.getMessage());
+                    // não limpar a tela se falhou no cancelamento
+                    return;
+                }
+            } else {
+                // usuário escolheu não cancelar: volta ao modo visual/edição sem apagar dados
+                aplicarModo(Modo.VISUAL);
+                if (emEdicao != null) {
+                    itens.setAll(emEdicao.getItens());
+                    atualizarTotais(emEdicao);
+                }
+                return;
+            }
         }
+
+        // se pedido está só em edição (sem id), tratamos como descartar edição: limpa a UI
+        limpar();
+        aplicarModo(Modo.VISUAL);
     }
 
     @FXML private void onAddItem() {
+        if (emEdicao == null) { erro("Validação","Nenhum pedido em edição"); return; }
+        // bloquear se status CANCELADO/PAGO/FINALIZADO
+        if (emEdicao.getStatus() != null &&
+                (emEdicao.getStatus().isCancelado() || emEdicao.getStatus().isPago() || emEdicao.getStatus().isFinalizado())) {
+            erro("Ação não permitida", "Não é possível editar um pedido que está cancelado, pago ou finalizado.");
+            return;
+        }
+        boolean podeEditar = (emEdicao.getStatus() != null && emEdicao.getStatus().isAberto())
+                || modo == Modo.NOVO
+                || modo == Modo.EDICAO
+                || (emEdicao.getStatus() != null && emEdicao.getStatus().isRascunho());
+        if (!podeEditar) {
+            erro("Ação não permitida", "Só é possível adicionar itens em pedidos com status ABERTO ou em modo de edição/rascunho");
+            return;
+        }
+
         Produto prod = cbProduto.getValue();
         if (prod == null) { erro("Validação","Selecione um produto"); return; }
         int qtd = spQtd.getValue() != null ? spQtd.getValue() : 1;
+
         ItemPedido existente = itens.stream()
                 .filter(i -> i.getProduto()!=null && i.getProduto().getId().equals(prod.getId()))
                 .findFirst().orElse(null);
@@ -323,21 +478,59 @@ public class PedidosController {
             emEdicao.getItens().addAll(itens);
             atualizarTotais(emEdicao);
         }
-        spQtd.getValueFactory().setValue(1);
     }
 
     @FXML private void onRemItem() {
+        if (emEdicao == null) { erro("Validação","Nenhum pedido em edição"); return; }
+        // bloquear se status CANCELADO/PAGO/FINALIZADO
+        if (emEdicao.getStatus() != null &&
+                (emEdicao.getStatus().isCancelado() || emEdicao.getStatus().isPago() || emEdicao.getStatus().isFinalizado())) {
+            erro("Ação não permitida", "Não é possível editar um pedido que está cancelado, pago ou finalizado.");
+            return;
+        }
+        boolean podeRemover = (emEdicao.getStatus() != null && emEdicao.getStatus().isAberto())
+                || modo == Modo.NOVO
+                || modo == Modo.EDICAO
+                || (emEdicao.getStatus() != null && emEdicao.getStatus().isRascunho());
+        if (!podeRemover) {
+            erro("Ação não permitida", "Só é possível remover itens em pedidos com status ABERTO ou em modo de edição/rascunho");
+            return;
+        }
         ItemPedido sel = tableItens.getSelectionModel().getSelectedItem();
-        if (sel == null) return;
-        itens.remove(sel);
-        if (emEdicao != null) {
-            emEdicao.getItens().clear();
-            emEdicao.getItens().addAll(itens);
-            atualizarTotais(emEdicao);
+        if (sel != null) {
+            itens.remove(sel);
+            if (emEdicao != null) {
+                emEdicao.getItens().clear();
+                emEdicao.getItens().addAll(itens);
+                atualizarTotais(emEdicao);
+            }
         }
     }
 
+    @FXML private void onEditar() {
+        if (tablePedidos.getSelectionModel().getSelectedItem() == null) { erro("Info","Selecione um pedido"); return; }
+        Pedido sel = tablePedidos.getSelectionModel().getSelectedItem();
+        // bloquear edição se cancelado/pago/finalizado
+        if (sel.getStatus() != null && (sel.getStatus().isCancelado() || sel.getStatus().isPago() || sel.getStatus().isFinalizado())) {
+            erro("Ação não permitida", "Não é possível editar um pedido que está cancelado, pago ou finalizado.");
+            return;
+        }
+        emEdicao = sel;
+        itens.setAll(emEdicao.getItens());
+        aplicarModo(Modo.EDICAO);
+    }
+
     private void editarQuantidadeItem(ItemPedido item) {
+        if (emEdicao == null) { erro("Validação","Nenhum pedido em edição"); return; }
+        if (emEdicao.getStatus() != null &&
+                (emEdicao.getStatus().isCancelado() || emEdicao.getStatus().isPago() || emEdicao.getStatus().isFinalizado())) {
+            erro("Validação","Ação nao permitida"); return;
+        }
+        boolean podeEditar = (emEdicao.getStatus() != null && emEdicao.getStatus().isAberto())
+                || modo == Modo.NOVO
+                || modo == Modo.EDICAO
+                || (emEdicao.getStatus() != null && emEdicao.getStatus().isRascunho());
+        if (!podeEditar) { erro("Validação","Ação nao permitida"); return; }
         TextInputDialog dlg = new TextInputDialog(String.valueOf(item.getQuantidade()));
         dlg.setTitle("Editar quantidade");
         dlg.setHeaderText("Produto: " + (item.getProduto()!=null? item.getProduto().getNome():""));

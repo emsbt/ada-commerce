@@ -21,13 +21,14 @@
                 <Label text="Pedidos" style="-fx-font-weight:bold; -fx-font-size:14;"/>
                 <Pane HBox.hgrow="ALWAYS"/>
                 <Button text="Novo Pedido" onAction="#onNovo"/>
-                <Button text="Salvar Rascunho" fx:id="btnSalvar" onAction="#onSalvar" disable="true"/>
-                <Button text="Confirmar" fx:id="btnConfirmar" onAction="#onConfirmar" disable="true"/>
-                <Button text="Cancelar" fx:id="btnCancelar" onAction="#onCancelar" disable="true"/>
-                <Button text="Abrir" fx:id="btnAbrir" onAction="#onAbrir" disable="true"/>
-                <Button text="Finalizar" fx:id="btnFinalizar" onAction="#onFinalizar" disable="true"/>
-                <Button text="Aguardar Pagamento" fx:id="btnAguardarPagamento" onAction="#onAguardarPagar" disable="true"/>
-                <Button text="Pagar" fx:id="btnPagar" onAction="#onPagar" disable="true"/>
+                <Button text="Salvar Rascunho" fx:id="btnSalvar" onAction="#onSalvar"/>
+                <Button text="Confirmar" fx:id="btnConfirmar" onAction="#onConfirmar"/>
+                <Button text="Editar" fx:id="btnEditar" onAction="#onEditar"/>
+                <Button text="Cancelar" fx:id="btnCancelar" onAction="#onCancelar"/>
+                <Button text="Abrir" fx:id="btnAbrir" onAction="#onAbrir"/>
+                <Button text="Finalizar" fx:id="btnFinalizar" onAction="#onFinalizar"/>
+                <Button text="Aguardar Pagamento" fx:id="btnAguardarPagamento" onAction="#onAguardarPagar"/>
+                <Button text="Pagar" fx:id="btnPagar" onAction="#onPagar"/>
             </HBox>
 
             <SplitPane dividerPositions="0.55">
@@ -55,23 +56,23 @@
                         <TextField fx:id="txtNumero" disable="true"/>
 
                         <Label text="Cliente:"/>
-                        <ComboBox fx:id="comboCliente" disable="true"/>
+                        <ComboBox fx:id="comboCliente" />
 
                         <Label text="Desconto:"/>
-                        <TextField fx:id="txtDesconto" disable="true"/>
+                        <TextField fx:id="txtDesconto" />
 
                         <Label text="Itens:"/>
 
                         <!-- Seleção de produto e quantidade -->
                         <HBox spacing="6">
-                            <ComboBox fx:id="cbProduto" promptText="Produto" prefWidth="220" disable="true"/>
-                            <Spinner fx:id="spQtd" prefWidth="90" disable="true">
+                            <ComboBox fx:id="cbProduto" promptText="Produto" prefWidth="220"/>
+                            <Spinner fx:id="spQtd" prefWidth="90">
                                 <valueFactory>
                                     <SpinnerValueFactory.IntegerSpinnerValueFactory min="1" max="999" initialValue="1"/>
                                 </valueFactory>
                             </Spinner>
-                            <Button text="+ Item" fx:id="btnAddItem" onAction="#onAddItem" disable="true"/>
-                            <Button text="- Item" fx:id="btnRemItem" onAction="#onRemItem" disable="true"/>
+                            <Button text="+ Item" fx:id="btnAddItem" onAction="#onAddItem"/>
+                            <Button text="- Item" fx:id="btnRemItem" onAction="#onRemItem"/>
                         </HBox>
 
                         <TableView fx:id="tableItens" prefHeight="180">

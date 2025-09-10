@@ -16,7 +16,12 @@ public class ItemPedido {
     public void setQuantidade(int quantidade) { this.quantidade = quantidade; }
 
     public double getPrecoUnitario() { return precoUnitario; }
-    public void setPrecoUnitario(double precoUnitario) { this.precoUnitario = precoUnitario; }
+    public void setPrecoUnitario(double precoUnitario) {
+        if (precoUnitario <= 0) {
+            throw new IllegalArgumentException("Preço unitário do item deve ser maior que zero");
+        }
+        this.precoUnitario = precoUnitario;
+    }
 
     public double getSubtotal() {
         return quantidade * precoUnitario;

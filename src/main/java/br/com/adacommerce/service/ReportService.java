@@ -37,7 +37,7 @@ public class ReportService {
                    SUM(i.quantidade * i.preco_unitario) faturamento
             FROM pedido p
             JOIN itens_pedido i ON i.pedido_id = p.id
-            WHERE p.status_pedido='CONFIRMADO'
+            WHERE p.status_pedido='PAGO'
               AND date(p.data_criacao) BETWEEN ? AND ?
             GROUP BY date(p.data_criacao)
             ORDER BY dia

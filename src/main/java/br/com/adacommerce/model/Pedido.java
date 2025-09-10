@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 public class Pedido {
+
     private Integer id;
     private String numero;
     private Cliente cliente;
@@ -15,6 +16,7 @@ public class Pedido {
     private PedidoStatus status = PedidoStatus.RASCUNHO;
     private final List<ItemPedido> itens = new ArrayList<>();
 
+    public Pedido() {}
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -32,7 +34,12 @@ public class Pedido {
     public void setDesconto(double desconto) { this.desconto = desconto; }
 
     public double getTotalBruto() { return totalBruto; }
+    // adicionado: setter para totalBruto
+    public void setTotalBruto(double totalBruto) { this.totalBruto = totalBruto; }
+
     public double getTotalLiquido() { return totalLiquido; }
+    // adicionado: setter para totalLiquido
+    public void setTotalLiquido(double totalLiquido) { this.totalLiquido = totalLiquido; }
 
     public PedidoStatus  getStatus() { return status; }
     public void setStatus(PedidoStatus  status) { this.status = status; }

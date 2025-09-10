@@ -26,6 +26,8 @@ public final class DatabaseConfig {
                     c.createStatement().execute("PRAGMA foreign_keys = ON");
                     migrarTabelaItensSeNecessario(c);  // antes de criar para evitar conflito
                     criarTabelas(c);
+                    // garantir colunas novas caso o DB já exista
+                    garantirColunasPedido(c);
                     seedOuMigrarAdmin(c);
                 }
                 initialized = true;
@@ -109,8 +111,12 @@ public final class DatabaseConfig {
                 CREATE TABLE IF NOT EXISTS pedido(
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
                   cliente_id INTEGER,
+                  numero TEXT,
                   status_pedido TEXT NOT NULL,
                   status_pagamento TEXT NOT NULL,
+                  desconto REAL NOT NULL DEFAULT 0,
+                  total_bruto REAL DEFAULT 0,
+                  total_liquido REAL DEFAULT 0,
                   data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
                   data_atualizacao DATETIME DEFAULT CURRENT_TIMESTAMP,
                   FOREIGN KEY(cliente_id) REFERENCES cliente(id)
@@ -123,9 +129,40 @@ public final class DatabaseConfig {
                   produto_nome_snapshot TEXT,
                   quantidade INTEGER NOT NULL,
                   preco_unitario REAL NOT NULL,
+                  desconto REAL NOT NULL DEFAULT 0,
                   FOREIGN KEY(pedido_id) REFERENCES pedido(id),
                   FOREIGN KEY(produto_id) REFERENCES produto(id)
                 )""");
+        }
+    }
+
+    private static void garantirColunasPedido(Connection c) throws SQLException {
+        // adiciona colunas que possam faltar em bancos antigos
+        ensureColumnExists(c, "pedido", "numero", "TEXT");
+        ensureColumnExists(c, "pedido", "total_bruto", "REAL DEFAULT 0");
+        ensureColumnExists(c, "pedido", "total_liquido", "REAL DEFAULT 0");
+        // desconto já existia no seu schema original; se quiser garantir:
+        ensureColumnExists(c, "pedido", "desconto", "REAL NOT NULL DEFAULT 0");
+    }
+
+    private static boolean columnExists(Connection c, String table, String column) throws SQLException {
+        // PRAGMA table_info retorna colunas: cid,name,type,...
+        try (Statement st = c.createStatement();
+             ResultSet rs = st.executeQuery("PRAGMA table_info('" + table + "')")) {
+            while (rs.next()) {
+                String name = rs.getString("name");
+                if (column.equalsIgnoreCase(name)) return true;
+            }
+        }
+        return false;
+    }
+
+    private static void ensureColumnExists(Connection c, String table, String columnName, String columnDefinition) throws SQLException {
+        if (columnExists(c, table, columnName)) return;
+        String sql = "ALTER TABLE " + table + " ADD COLUMN " + columnName + " " + columnDefinition;
+        try (Statement st = c.createStatement()) {
+            System.out.println("[DB] Adicionando coluna " + columnName + " em " + table);
+            st.execute(sql);
         }
     }
 

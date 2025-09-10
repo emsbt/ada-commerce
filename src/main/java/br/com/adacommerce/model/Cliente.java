@@ -8,6 +8,7 @@ public class Cliente {
     private String email;
     private String documento;
     private String telefone;
+    private String endereco; // adicionado
     private boolean ativo = true;
     private Date dataCriacao;
     private Date dataAtualizacao;
@@ -22,6 +23,8 @@ public class Cliente {
     public void setDocumento(String documento) { this.documento = documento; }
     public String getTelefone() { return telefone; }
     public void setTelefone(String telefone) { this.telefone = telefone; }
+    public String getEndereco() { return endereco; }
+    public void setEndereco(String endereco) { this.endereco = endereco; }
     public boolean isAtivo() { return ativo; }
     public void setAtivo(boolean ativo) { this.ativo = ativo; }
     public Date getDataCriacao() { return dataCriacao; }
