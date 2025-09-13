@@ -18,22 +18,32 @@ mvn test
 Estrutura do Projeto:
 
 br.com.adacommerce/
-├── config/              # Configuração do banco
-├── controller/          # Controladores JavaFX (13 controllers)
-├── dao/                 # Data Access Objects (2 DAOs)
-├── domain/              # Domínios de negócio
-│   ├── cliente/         # Domínio de clientes
-│   ├── pedido/          # Domínio de pedidos
-│   └── produto/         # Domínio de produtos
-├── model/               # Modelos de dados
-├── report/              # Sistema de relatórios
-├── service/             # Serviços de negócio (7 services)
-├── session/             # Gerenciamento de sessão
-├── util/                # Utilitários
-└── resources/           # Recursos da aplicação
-├── css/             # Estilos CSS
-├── fxml/            # Views JavaFX (13 telas)
-└── configurações    # Configurações adicionais
+
+  ├── config/              # Configuração do banco
+  
+  ├── controller/          # Controladores JavaFX (13 controllers)
+  
+  ├── dao/                 # Data Access Objects (2 DAOs)
+  
+  ├── domain/              # Domínios de negócio
+  
+  ├── model/               # Modelos de dados
+  
+  ├── report/              # Sistema de relatórios
+  
+  ├── service/             # Serviços de negócio (7 services)
+  
+  ├── session/             # Gerenciamento de sessão
+  
+  ├── util/                # Utilitários
+  
+  └── resources/           # Recursos da aplicação
+  
+  ├── css/             # Estilos CSS
+  
+  ├── fxml/            # Views JavaFX (13 telas)
+  
+  └── configurações    # Configurações adicionais
 
 Configuração do Banco de Dados
 
