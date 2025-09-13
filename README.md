@@ -1,13 +1,14 @@
 ******# Ada Commerce - E-Commerce
-
 Visão Geral
-
 O Ada Commerce é um sistema completo de gerenciamento de e-commerce desenvolvido em Java com interface gráfica JavaFX, arquitetura em camadas e banco de dados SQLite.
 Como Executar com Maven
+
 Pré-requisitos
+
 Java JDK 11 ou superior
 
 Maven 3.6 ou superior
+
 
 Comandos para execução
 Compilar o projeto:
