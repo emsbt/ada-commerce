@@ -44,7 +44,7 @@ br.com.adacommerce/
   
   ├── fxml/            # Views JavaFX (13 telas)
   
-  └── configurações    # Configurações adicionais
+
 
 Configuração do Banco de Dados
 
